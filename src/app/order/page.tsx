@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Search, Square, ShoppingCart, Trash2, X, ArrowLeft } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import Logo from "@/components/Logo";
 
 type MenuItem = {
   id: string;
@@ -36,9 +37,15 @@ export default function OrderPage() {
   const [cart, setCart] = useState<Record<string, number>>({});
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLoginSheet, setShowLoginSheet] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+    const user = localStorage.getItem("bheemasena_user");
+    if (user) {
+      setIsLoggedIn(true);
+    }
   }, []);
 
   const filteredMenu = useMemo(() => {
@@ -63,6 +70,14 @@ export default function OrderPage() {
     });
   };
 
+  const handleAddClick = (id: string) => {
+    if (!isLoggedIn) {
+      setShowLoginSheet(true);
+      return;
+    }
+    updateCart(id, 1);
+  };
+
   const cartTotalItems = Object.values(cart).reduce((a, b) => a + b, 0);
   const cartTotalPrice = Object.entries(cart).reduce((total, [id, qty]) => {
     const item = MENU_DATA.find((i) => i.id === id);
@@ -80,8 +95,7 @@ export default function OrderPage() {
             <ArrowLeft size={24} className="text-foreground mr-4" />
             <h1 className="font-serif font-bold text-xl text-gradient-dark">Menu</h1>
           </Link>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/bheemasena-logo.jpeg" alt="Logo" className="h-8 w-auto object-contain" />
+          <Logo className="h-8 w-auto" />
         </div>
 
         {/* Category Tabs */}
@@ -138,7 +152,7 @@ export default function OrderPage() {
                 <div className="flex-shrink-0">
                   {!cart[item.id] ? (
                     <button 
-                      onClick={() => updateCart(item.id, 1)}
+                      onClick={() => handleAddClick(item.id)}
                       className="border-[1.5px] border-[#E8810A] text-[#E8810A] rounded-lg px-[20px] py-[6px] font-bold text-[14px] hover:bg-[#E8810A] hover:text-white transition-colors"
                     >
                       ADD
@@ -334,6 +348,55 @@ export default function OrderPage() {
                   </button>
                 </Link>
               </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Login Bottom Sheet */}
+      <AnimatePresence>
+        {showLoginSheet && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowLoginSheet(false)}
+              className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed bottom-0 left-0 w-full bg-[#FFFAF0] z-[210] border-t-[2px] border-[rgba(232,129,10,0.30)] rounded-t-[20px] p-[28px_24px] shadow-2xl"
+              style={{ maxHeight: '60vh' }}
+            >
+              <div className="w-[40px] h-[4px] bg-[rgba(26,10,0,0.15)] rounded-full mx-auto mb-5"></div>
+              
+              <div className="flex justify-center mb-4">
+                <Logo className="h-[48px] w-auto" />
+              </div>
+              
+              <h2 className="text-[20px] font-bold text-[#1A0A00] text-center mb-2">
+                Login to add items
+              </h2>
+              <p className="text-[rgba(26,10,0,0.55)] text-[14px] text-center mb-6">
+                Create a free account or login to start ordering from Bheemasena.
+              </p>
+              
+              <Link href="/login?returnTo=/order" className="block w-full">
+                <button className="w-full h-[50px] rounded-[12px] bg-gradient-to-r from-[#E8810A] to-[#C0392B] text-white font-bold text-[16px] shadow-lg mb-4">
+                  Login / Create Account
+                </button>
+              </Link>
+              
+              <button 
+                onClick={() => setShowLoginSheet(false)}
+                className="w-full text-[#E8810A] text-[14px] font-medium text-center hover:opacity-80 transition-opacity"
+              >
+                Continue browsing
+              </button>
             </motion.div>
           </>
         )}

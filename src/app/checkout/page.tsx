@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Banknote, CreditCard, CheckCircle, PartyPopper } from "lucide-react";
 import { motion } from "framer-motion";
+import Logo from "@/components/Logo";
 
 export default function CheckoutPage() {
   const [isClient, setIsClient] = useState(false);
@@ -50,8 +51,9 @@ export default function CheckoutPage() {
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", damping: 15 }}
-          className="mb-8"
+          className="mb-8 flex flex-col items-center"
         >
+          <Logo className="h-[40px] w-auto mb-6" />
           <CheckCircle size={72} color="#E8810A" strokeWidth={1.5} />
         </motion.div>
         

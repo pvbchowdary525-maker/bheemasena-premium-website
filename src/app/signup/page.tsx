@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Mail, ArrowLeft } from "lucide-react";
+import Logo from "@/components/Logo";
 
 export default function SignupPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -52,8 +53,7 @@ export default function SignupPage() {
       
       <div className="relative z-10 w-[90vw] max-w-[400px] bg-[rgba(232,129,10,0.06)] border border-[rgba(232,129,10,0.20)] rounded-[20px] p-[40px_32px]">
         <div className="flex justify-center mb-[24px]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/bheemasena-logo.jpeg" alt="Logo" className="h-[64px] w-auto object-contain" />
+          <Logo className="h-[64px] w-auto" />
         </div>
         
         <div className="text-center mb-6">

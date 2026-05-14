@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Logo from "@/components/Logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,7 +15,10 @@ export default function LoginPage() {
     e.preventDefault();
     if (email && password) {
       localStorage.setItem("bheemasena_user", JSON.stringify({ name: email.split("@")[0], email }));
-      router.push("/order");
+      
+      const params = new URLSearchParams(window.location.search);
+      const returnTo = params.get("returnTo") || "/order";
+      router.push(returnTo);
     }
   };
 
@@ -27,8 +31,7 @@ export default function LoginPage() {
       
       <div className="relative z-10 w-[90vw] max-w-[400px] bg-[rgba(232,129,10,0.06)] border border-[rgba(232,129,10,0.20)] rounded-[20px] p-[40px_32px]">
         <div className="flex justify-center mb-[24px]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/bheemasena-logo.jpeg" alt="Logo" className="h-[64px] w-auto object-contain" />
+          <Logo className="h-[64px] w-auto" />
         </div>
         
         <div className="text-center mb-6">
