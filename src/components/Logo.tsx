@@ -14,10 +14,10 @@ export default function Logo({ className = "h-9 w-auto", textClass = "text-xl" }
   }
 
   return (
-    /* eslint-disable-next-line @next/next/no-img-element */
-    <img 
-      src="/bheemasena-logo.jpeg" 
-      alt="Hotel Bheemasena" 
+    /* eslint-disable-next-line @next/next/no-img-element*/
+    <img
+      src="/bheemasena-logo.jpeg"
+      alt="Hotel Bheemasena"
       className={`${className} object-contain block`}
       onError={() => setError(true)}
     />
