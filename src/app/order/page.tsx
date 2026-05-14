@@ -16,20 +16,64 @@ type MenuItem = {
 };
 
 const MENU_DATA: MenuItem[] = [
-  { id: "1", name: "Classic Idli (3 pcs)", description: "Soft, fluffy steamed rice cakes served with sambar and two chutneys.", price: 40, category: "Breakfast", isVeg: true },
-  { id: "2", name: "Masala Dosa", description: "Crispy crepe stuffed with spiced potato filling.", price: 60, category: "Breakfast", isVeg: true },
-  { id: "3", name: "Chicken Dum Biryani", description: "Aromatic basmati rice cooked with tender chicken and secret spices.", price: 180, category: "Biryani", isVeg: false },
-  { id: "4", name: "Paneer Biryani", description: "Flavorful biryani layered with marinated paneer cubes.", price: 160, category: "Biryani", isVeg: true },
-  { id: "5", name: "South Indian Thali", description: "Rice, Dal, 2 Curries, Sambar, Rasam, Curd, Papad, Sweet.", price: 120, category: "Thali", isVeg: true },
-  { id: "6", name: "Sambar Rice", description: "Comforting rice mixed with flavorful lentil stew and ghee.", price: 80, category: "Rice & Curries", isVeg: true },
-  { id: "7", name: "Chicken Curry", description: "Spicy Andhra style chicken curry.", price: 140, category: "Rice & Curries", isVeg: false },
-  { id: "8", name: "Mirchi Bajji (4 pcs)", description: "Spicy green chilies deep fried in chickpea batter.", price: 40, category: "Snacks", isVeg: true },
-  { id: "9", name: "Filter Coffee", description: "Authentic South Indian strong filter coffee.", price: 25, category: "Beverages", isVeg: true },
-  { id: "10", name: "Masala Chai", description: "Hot tea brewed with aromatic Indian spices.", price: 20, category: "Beverages", isVeg: true },
-  { id: "11", name: "Gulab Jamun (2 pcs)", description: "Soft milk solids balls soaked in sugar syrup.", price: 40, category: "Desserts", isVeg: true },
+  // Veg Starters
+  { id: "vst-1", name: "Veg Manchuria", description: "Vegetable dumplings tossed in a savory Indo-Chinese sauce.", price: 210, category: "Veg Starters", isVeg: true },
+  { id: "vst-2", name: "Chilli Mushroom", description: "Crispy mushrooms tossed in spicy chilli sauce.", price: 230, category: "Veg Starters", isVeg: true },
+  { id: "vst-3", name: "Crispy Baby Corn", description: "Fried baby corn with a crunchy, spiced coating.", price: 230, category: "Veg Starters", isVeg: true },
+  { id: "vst-4", name: "Paneer 65", description: "Spicy, deep-fried paneer cubes tossed in curry leaves.", price: 280, category: "Veg Starters", isVeg: true },
+  { id: "vst-5", name: "Paneer Majestic", description: "Delicious paneer strips cooked in a creamy, tangy yogurt sauce.", price: 290, category: "Veg Starters", isVeg: true },
+  
+  // Non-Veg Starters
+  { id: "nvst-1", name: "Chilli Chicken", description: "Spicy battered chicken chunks tossed with bell peppers and onions.", price: 290, category: "Non-Veg Starters", isVeg: false },
+  { id: "nvst-2", name: "Chicken Manchuria", description: "Fried chicken tossed in sweet, spicy, and tangy Manchurian sauce.", price: 290, category: "Non-Veg Starters", isVeg: false },
+  { id: "nvst-3", name: "Chicken 65", description: "Classic fiery red, deep-fried chicken bites.", price: 290, category: "Non-Veg Starters", isVeg: false },
+  { id: "nvst-4", name: "Chicken Majestic", description: "Chicken strips marinated, fried, and sautéed in a rich yogurt sauce.", price: 290, category: "Non-Veg Starters", isVeg: false },
+
+  // Veg Biryani (Sufficient for 2 people)
+  { id: "vbir-1", name: "Special Paneer Biryani", description: "Aromatic basmati rice cooked with rich paneer and secret spices. (Serves 2)", price: 290, category: "Veg Biryani", isVeg: true },
+  { id: "vbir-2", name: "Special Mushroom Biryani", description: "Flavor-packed biryani layered with spiced mushrooms. (Serves 2)", price: 290, category: "Veg Biryani", isVeg: true },
+  { id: "vbir-3", name: "Special Veg Biryani", description: "Classic vegetable biryani cooked to perfection. (Serves 2)", price: 260, category: "Veg Biryani", isVeg: true },
+  { id: "vbir-4", name: "Ulavacharu Biryani", description: "Authentic Andhra-style biryani flavored with horse gram soup. (Serves 2)", price: 270, category: "Veg Biryani", isVeg: true },
+  { id: "vbir-5", name: "Kaju Biryani", description: "Rich and luxurious biryani loaded with roasted cashews. (Serves 2)", price: 290, category: "Veg Biryani", isVeg: true },
+  { id: "vbir-6", name: "Special Kaju Biryani", description: "Extra special rich biryani loaded with premium cashews. (Serves 2)", price: 310, category: "Veg Biryani", isVeg: true },
+  { id: "vbir-7", name: "Biryani Rice", description: "Plain aromatic biryani flavored rice. (Serves 2)", price: 180, category: "Veg Biryani", isVeg: true },
+  { id: "vbir-8", name: "Veg Biryani", description: "Standard fragrant vegetable biryani. (Serves 2)", price: 240, category: "Veg Biryani", isVeg: true },
+
+  // Non-Veg Biryani (Sufficient for 2 people)
+  { id: "nvbir-1", name: "Special Egg Biryani", description: "Flavorful biryani with perfectly boiled and spiced eggs. (Serves 2)", price: 280, category: "Non-Veg Biryani", isVeg: false },
+  { id: "nvbir-2", name: "Chicken Dum Biryani", description: "Aromatic basmati rice cooked with tender chicken and secret spices. (Serves 2)", price: 270, category: "Non-Veg Biryani", isVeg: false },
+  { id: "nvbir-3", name: "Kundan Biryani", description: "Chef's special premium chicken biryani. (Serves 2)", price: 360, category: "Non-Veg Biryani", isVeg: false },
+  { id: "nvbir-4", name: "Chicken Fry Biryani", description: "Biryani rice served with spicy fried chicken pieces. (Serves 2)", price: 280, category: "Non-Veg Biryani", isVeg: false },
+  { id: "nvbir-5", name: "Special Chicken Biryani", description: "Extra rich chicken biryani with special spices and boneless pieces. (Serves 2)", price: 300, category: "Non-Veg Biryani", isVeg: false },
+  { id: "nvbir-6", name: "Joint Biryani", description: "Biryani served with full chicken leg joints. (Serves 2)", price: 310, category: "Non-Veg Biryani", isVeg: false },
+  { id: "nvbir-7", name: "Chicken Mughlai Biryani", description: "Rich and creamy Mughlai-style chicken biryani. (Serves 2)", price: 310, category: "Non-Veg Biryani", isVeg: false },
+  { id: "nvbir-8", name: "Chicken Lollipop Biryani", description: "Spicy biryani served with crispy chicken lollipops. (Serves 2)", price: 330, category: "Non-Veg Biryani", isVeg: false },
+
+  // Mini Biryani (Sufficient for 1 person)
+  { id: "mbir-1", name: "Mini Dum Biryani", description: "Single portion of our classic Chicken Dum Biryani.", price: 170, category: "Mini Biryani", isVeg: false },
+  { id: "mbir-2", name: "Mini Fry Biryani", description: "Single portion of Chicken Fry Biryani.", price: 180, category: "Mini Biryani", isVeg: false },
+  { id: "mbir-3", name: "Mini Special Chicken Biryani", description: "Single portion of our Special Chicken Biryani.", price: 190, category: "Mini Biryani", isVeg: false },
+  { id: "mbir-4", name: "Mini Paneer Biryani", description: "Single portion of our Special Paneer Biryani.", price: 190, category: "Mini Biryani", isVeg: true },
+  { id: "mbir-5", name: "Mini Mushroom Biryani", description: "Single portion of Special Mushroom Biryani.", price: 200, category: "Mini Biryani", isVeg: true },
+  { id: "mbir-6", name: "Mini Mughlai Biryani", description: "Single portion of rich Chicken Mughlai Biryani.", price: 200, category: "Mini Biryani", isVeg: false },
+  { id: "mbir-7", name: "Mini Boneless Biryani", description: "Single portion of boneless chicken biryani.", price: 190, category: "Mini Biryani", isVeg: false },
+  { id: "mbir-8", name: "Mini Special Biryani", description: "Single portion of our premium special biryani.", price: 200, category: "Mini Biryani", isVeg: false },
+
+  // Breads
+  { id: "brd-1", name: "Butter Naan", description: "Soft Indian flatbread cooked in tandoor and brushed with butter.", price: 45, category: "Breads", isVeg: true },
+  { id: "brd-2", name: "Roti", description: "Whole wheat flatbread cooked in tandoor.", price: 25, category: "Breads", isVeg: true },
+
+  // Veg Curries
+  { id: "vcur-1", name: "Paneer Butter Masala", description: "Cottage cheese cubes in a rich tomato and butter gravy.", price: 280, category: "Veg Curries", isVeg: true },
+  { id: "vcur-2", name: "Kaju Paneer Butter Masala", description: "Premium curry with cashews and paneer in a buttery gravy.", price: 300, category: "Veg Curries", isVeg: true },
+
+  // Non-Veg Curries
+  { id: "nvcur-1", name: "Egg Burji", description: "Spicy Indian scrambled eggs with onions and tomatoes.", price: 190, category: "Non-Veg Curries", isVeg: false },
+  { id: "nvcur-2", name: "Butter Chicken", description: "Tender chicken cooked in a rich, creamy, tomato-based gravy.", price: 290, category: "Non-Veg Curries", isVeg: false },
+  { id: "nvcur-3", name: "Chicken Curry", description: "Classic homestyle spicy chicken curry.", price: 270, category: "Non-Veg Curries", isVeg: false },
 ];
 
-const CATEGORIES = ["All", "Breakfast", "Biryani", "Thali", "Rice & Curries", "Snacks", "Beverages", "Desserts"];
+const CATEGORIES = ["All", "Veg Starters", "Non-Veg Starters", "Veg Biryani", "Non-Veg Biryani", "Mini Biryani", "Breads", "Veg Curries", "Non-Veg Curries"];
 
 export default function OrderPage() {
   const [activeCategory, setActiveCategory] = useState("All");
