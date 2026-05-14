@@ -51,8 +51,7 @@ export default function ScrollSequence() {
       (ctx as any).imageSmoothingQuality = 'high';
 
       if (window.innerWidth < 768) {
-        /* MOBILE — top-anchored: character's face always fully visible,
-           food items at bottom may be partially cropped — this is fine  */
+        /* MOBILE — top-anchored: character's face always fully visible */
         let drawW, drawH, offsetX;
         if (iAR > cAR) {
           drawH = cH;
@@ -173,7 +172,7 @@ export default function ScrollSequence() {
       {isLoaderVisible && (
         <div id="loader" style={{
           position: "fixed", inset: 0, zIndex: 9999,
-          background: "#FDF6E3",
+          background: "#050505",
           display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center",
           gap: "16px",
@@ -205,156 +204,208 @@ export default function ScrollSequence() {
 
         .beat {
           position: absolute;
-          background: rgba(253, 246, 227, 0.72);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(232, 129, 10, 0.18);
-          box-shadow: 0 4px 24px rgba(232, 129, 10, 0.08);
-          border-radius: 18px;
-          padding: 24px 28px;
           width: 90%;
-          max-width: 560px;
+          max-width: 640px;
+          padding: 0;
           opacity: 0;
           pointer-events: none;
-          transition: opacity 0.45s ease, transform 0.45s ease;
+          transform: translateY(60px);
+          transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
           box-sizing: border-box;
           z-index: 10;
         }
         
-        @media (max-width: 767px) {
-          .beat {
-            background: rgba(253, 246, 227, 0.82);
-            padding: 18px 20px;
-            border-radius: 14px;
-            width: 88%;
-          }
-        }
         .beat.visible {
           opacity: 1;
           pointer-events: auto;
+          transform: translateY(0);
         }
 
-        /* Beat-specific positions and enter directions */
+        /* Staggered children animation for award-winning feel */
+        .beat > * {
+          opacity: 0;
+          transform: translateY(20px);
+          transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .beat.visible > * {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .beat.visible > *:nth-child(1) { transition-delay: 0.1s; }
+        .beat.visible > *:nth-child(2) { transition-delay: 0.2s; }
+        .beat.visible > *:nth-child(3) { transition-delay: 0.3s; }
+        .beat.visible > *:nth-child(4) { transition-delay: 0.4s; }
+        .beat.visible > *:nth-child(5) { transition-delay: 0.5s; }
+        .beat.visible > *:nth-child(6) { transition-delay: 0.6s; }
+
+        /* Beat-specific positions */
         #beat-1 {
-          bottom: 10%;
+          top: 50%;
           left: 50%;
-          transform: translateX(-50%) translateY(20px);
+          transform: translate(-50%, -50%) translateY(60px);
           text-align: center;
         }
-        #beat-1.visible { transform: translateX(-50%) translateY(0); }
+        #beat-1.visible { transform: translate(-50%, -50%) translateY(0); }
 
         #beat-2 {
           top: 50%;
-          left: 4%;
-          transform: translateY(-50%) translateX(-30px);
+          left: 6%;
+          transform: translateY(-50%) translateX(-40px);
+          max-width: 520px;
         }
         #beat-2.visible { transform: translateY(-50%) translateX(0); }
 
         #beat-3 {
           top: 50%;
-          right: 4%;
+          right: 6%;
           left: auto;
-          transform: translateY(-50%) translateX(30px);
+          transform: translateY(-50%) translateX(40px);
+          text-align: right;
+          max-width: 520px;
         }
         #beat-3.visible { transform: translateY(-50%) translateX(0); }
+        #beat-3 .beat-point { flex-direction: row-reverse; }
 
         #beat-4 {
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) scale(0.96);
-          text-align: center;
+          top: 65%;
+          left: 6%;
+          transform: translateY(-50%) translateY(40px);
+          max-width: 520px;
         }
-        #beat-4.visible { transform: translate(-50%, -50%) scale(1); }
+        #beat-4.visible { transform: translateY(-50%) translateY(0); }
 
         #beat-5 {
           top: 50%;
           left: 50%;
-          transform: translate(-50%, -50%) translateY(20px);
+          transform: translate(-50%, -50%) translateY(60px);
           text-align: center;
         }
         #beat-5.visible { transform: translate(-50%, -50%) translateY(0); }
+
+        @media (max-width: 767px) {
+          #beat-2, #beat-3, #beat-4 {
+            top: 50%;
+            left: 50%;
+            right: auto;
+            text-align: center;
+            transform: translate(-50%, -50%) translateY(40px);
+            width: 90%;
+            max-width: 100%;
+          }
+          #beat-2.visible, #beat-3.visible, #beat-4.visible {
+            transform: translate(-50%, -50%) translateY(0);
+          }
+          #beat-3 .beat-point {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+          }
+          .beat-point {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+          }
+          .beat-point svg {
+            display: none;
+          }
+        }
 
         /* Typography inside beats */
         .beat-headline {
           font-family: 'Playfair Display', serif;
           font-weight: 800;
-          font-size: clamp(22px, 5.5vw, 44px);
-          color: #1A0A00;
-          line-height: 1.15;
-          margin: 0 0 10px 0;
+          font-size: clamp(36px, 8vw, 72px);
+          color: #FDF6E3;
+          line-height: 1.05;
+          margin: 0 0 16px 0;
+          text-shadow: 0 4px 32px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.6);
         }
-        .beat-headline.saffron { color: #C05E00; }
+        .beat-headline.saffron { color: #E8810A; }
 
         .beat-sub {
           font-family: 'Poppins', sans-serif;
-          font-size: clamp(13px, 3vw, 16px);
-          color: rgba(26, 10, 0, 0.72);
-          line-height: 1.65;
-          margin: 0 0 8px 0;
+          font-size: clamp(16px, 3.5vw, 24px);
+          color: rgba(253, 246, 227, 0.85);
+          line-height: 1.6;
+          margin: 0 0 12px 0;
+          text-shadow: 0 2px 16px rgba(0,0,0,0.8);
         }
 
         .beat-micro {
           font-family: 'Poppins', sans-serif;
-          font-size: clamp(11px, 2.5vw, 13px);
-          color: rgba(26, 10, 0, 0.50);
+          font-size: clamp(12px, 2.5vw, 15px);
+          color: rgba(253, 246, 227, 0.60);
           line-height: 1.5;
           margin: 0;
+          text-shadow: 0 2px 8px rgba(0,0,0,0.8);
         }
 
         .beat-point {
           font-family: 'Poppins', sans-serif;
-          font-size: clamp(13px, 3vw, 15px);
-          color: rgba(26, 10, 0, 0.72);
+          font-size: clamp(14px, 3vw, 18px);
+          color: rgba(253, 246, 227, 0.85);
           display: flex;
           align-items: flex-start;
-          gap: 8px;
-          margin-top: 10px;
+          gap: 12px;
+          margin-top: 16px;
           line-height: 1.5;
+          text-shadow: 0 2px 16px rgba(0,0,0,0.8);
         }
 
         .beat-point span {
-          color: rgba(26, 10, 0, 0.72);
+          color: rgba(253, 246, 227, 0.85);
         }
 
         .beat-btn-row {
           display: flex;
-          gap: 12px;
+          gap: 16px;
           flex-wrap: wrap;
           justify-content: center;
-          margin-top: 22px;
+          margin-top: 36px;
         }
         .btn-primary {
           background: linear-gradient(135deg, #E8810A, #C0392B);
           color: white;
           border: none;
           border-radius: 12px;
-          padding: 13px 26px;
+          padding: 16px 32px;
           font-family: 'Poppins', sans-serif;
           font-weight: 700;
-          font-size: clamp(13px, 3vw, 15px);
+          font-size: clamp(14px, 3vw, 16px);
           cursor: pointer;
           text-decoration: none;
           display: inline-block;
+          box-shadow: 0 8px 32px rgba(232, 129, 10, 0.30);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 40px rgba(232, 129, 10, 0.40);
         }
         .btn-secondary {
-          border: 1.5px solid #E8810A;
-          color: #E8810A;
-          background: transparent;
+          border: 1.5px solid rgba(253, 246, 227, 0.8);
+          color: #FDF6E3;
+          background: rgba(0,0,0,0.2);
+          backdrop-filter: blur(8px);
           border-radius: 12px;
-          padding: 13px 26px;
+          padding: 16px 32px;
           font-family: 'Poppins', sans-serif;
           font-weight: 600;
-          font-size: clamp(13px, 3vw, 15px);
+          font-size: clamp(14px, 3vw, 16px);
           cursor: pointer;
           text-decoration: none;
           display: inline-block;
+          transition: background 0.2s ease;
+        }
+        .btn-secondary:hover {
+          background: rgba(253, 246, 227, 0.1);
         }
 
         #bheemasena-canvas {
           image-rendering: -webkit-optimize-contrast;
           image-rendering: crisp-edges;
-          opacity: 0.55;
-          transition: opacity 0.3s ease;
+          opacity: 0.25;
+          transition: opacity 0.5s ease;
         }
 
         #canvas-vignette {
@@ -365,9 +416,9 @@ export default function ScrollSequence() {
           pointer-events: none;
           background: radial-gradient(
             ellipse at center,
-            transparent 40%,
-            rgba(253, 246, 227, 0.35) 75%,
-            rgba(253, 246, 227, 0.65) 100%
+            transparent 10%,
+            rgba(0, 0, 0, 0.7) 60%,
+            rgba(0, 0, 0, 0.95) 100%
           );
         }
 
@@ -376,7 +427,7 @@ export default function ScrollSequence() {
           pointer-events: none;
           user-select: none;
           z-index: 3;
-          opacity: 0.08;
+          opacity: 0.04;
           fill: none;
           stroke: #E8810A;
           stroke-width: 2;
@@ -387,17 +438,15 @@ export default function ScrollSequence() {
           pointer-events: none;
           user-select: none;
           z-index: 3;
-          opacity: 0.08;
+          opacity: 0.04;
           fill: #E8810A;
         }
-
-        .myth-lotus { opacity: 0.10; stroke: #C0392B; stroke-width: 2; }
       `}} />
 
       {/* Decorative top border above the scrollytelling */}
-      <div style={{ width: "100%", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "#FDF6E3", position: "relative", zIndex: 10 }}>
+      <div style={{ width: "100%", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "#050505", position: "relative", zIndex: 10 }}>
         {/* Diya separator */}
-        <svg viewBox="0 0 100 100" style={{ height: "32px", opacity: 0.30, fill: "#E8810A" }} className="myth-symbol-filled relative">
+        <svg viewBox="0 0 100 100" style={{ height: "32px", opacity: 0.20, fill: "#E8810A" }} className="myth-symbol-filled relative">
           <path d="M50 0 C80 40 80 80 50 100 C20 80 20 40 50 0 M30 100 L70 100 L70 110 L30 110 Z" />
         </svg>
       </div>
@@ -408,7 +457,7 @@ export default function ScrollSequence() {
           position: "relative",
           height: "500vh",
           width: "100%",
-          background: "#141414", // Fallback dark background
+          background: "#050505", 
         }}
       >
         <div
@@ -420,26 +469,26 @@ export default function ScrollSequence() {
             width: "100vw",
             height: "100vh",
             overflow: "hidden",
-            background: "#141414",
+            background: "#050505",
           }}
         >
           {/* Lotus top left */}
-          <svg viewBox="0 0 100 100" className="myth-symbol myth-lotus" style={{ top: "20px", left: "20px", width: "60px", height: "60px" }}>
+          <svg viewBox="0 0 100 100" className="myth-symbol" style={{ top: "20px", left: "20px", width: "80px", height: "80px" }}>
             <path d="M50 95 C20 95 5 70 5 50 C25 35 40 45 50 60 C60 45 75 35 95 50 C95 70 80 95 50 95 M50 95 C30 75 25 35 50 5 C75 35 70 75 50 95" />
           </svg>
 
           {/* Lotus top right */}
-          <svg viewBox="0 0 100 100" className="myth-symbol myth-lotus" style={{ top: "20px", right: "20px", width: "60px", height: "60px" }}>
+          <svg viewBox="0 0 100 100" className="myth-symbol" style={{ top: "20px", right: "20px", width: "80px", height: "80px" }}>
             <path d="M50 95 C20 95 5 70 5 50 C25 35 40 45 50 60 C60 45 75 35 95 50 C95 70 80 95 50 95 M50 95 C30 75 25 35 50 5 C75 35 70 75 50 95" />
           </svg>
 
           {/* Gada left center */}
-          <svg viewBox="0 0 100 300" className="myth-symbol-filled" style={{ left: "10px", top: "50%", transform: "translateY(-50%)", height: "clamp(80px, 15vw, 180px)", width: "auto" }}>
+          <svg viewBox="0 0 100 300" className="myth-symbol-filled" style={{ left: "20px", top: "50%", transform: "translateY(-50%)", height: "clamp(120px, 20vw, 240px)", width: "auto" }}>
             <path d="M40 280 L60 280 L60 220 C80 200 90 150 90 100 C90 50 60 20 50 0 C40 20 10 50 10 100 C10 150 20 200 40 220 Z" />
           </svg>
 
           {/* Conch bottom right */}
-          <svg viewBox="0 0 100 100" className="myth-symbol-filled" style={{ bottom: "20px", right: "20px", width: "80px", height: "80px" }}>
+          <svg viewBox="0 0 100 100" className="myth-symbol-filled" style={{ bottom: "20px", right: "20px", width: "100px", height: "100px" }}>
             <path d="M30 90 C10 70 10 30 50 10 C90 30 90 70 70 90 C60 110 40 110 30 90 M50 10 C60 30 60 60 40 70" fill="none" stroke="#E8810A" strokeWidth="4" />
             <path d="M30 90 C10 70 10 30 50 10 C90 30 90 70 70 90 C60 110 40 110 30 90 Z" opacity="0.5" />
           </svg>
@@ -477,21 +526,23 @@ export default function ScrollSequence() {
                 src="/bheemasena-logo.jpeg" 
                 alt="Bheemasena Logo" 
                 style={{ 
-                  height: "60px", 
+                  height: "80px", 
                   width: "auto", 
                   objectFit: "contain", 
                   display: "block", 
-                  margin: "0 auto 14px auto"
+                  margin: "0 auto 24px auto",
+                  borderRadius: "8px",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.6)"
                 }} 
               />
               <p className="beat-headline">Hotel Bheemasena</p>
-              <p className="beat-sub" style={{ color: "#B85E00", fontWeight: 700, fontSize: "clamp(16px, 3.5vw, 22px)" }}>
+              <p className="beat-sub" style={{ color: "#E8810A", fontWeight: 700 }}>
                 Where every meal feels like a celebration.
               </p>
               <p className="beat-sub">
                 Nestled in Mandadam, steps away from VIT-AP University — Bheemasena has been the heart of student hunger since day one. Every plate tells a story. Every bite feels like home.
               </p>
-              <p className="beat-micro">
+              <p className="beat-micro" style={{ marginTop: "24px", letterSpacing: "1px", textTransform: "uppercase" }}>
                 Mandadam – 522237 &nbsp;·&nbsp; Open daily &nbsp;·&nbsp; Breakfast to Dinner
               </p>
             </div>
@@ -505,7 +556,7 @@ export default function ScrollSequence() {
               <p className="beat-sub">
                 From piping hot idlis at 7am to satisfying rice meals at noon — Bheemasena fuels your whole day, every day.
               </p>
-              <p className="beat-micro">
+              <p className="beat-micro" style={{ marginTop: "24px", letterSpacing: "1px", textTransform: "uppercase" }}>
                 Freshly cooked &nbsp;·&nbsp; No preservatives &nbsp;·&nbsp; Made to order
               </p>
             </div>
@@ -514,23 +565,23 @@ export default function ScrollSequence() {
             <div id="beat-3" className="beat">
               <p className="beat-headline">A menu built<br/>for every craving.</p>
               <div className="beat-point">
-                <ChevronRight size={16} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
+                <ChevronRight size={24} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
                 <span><strong>Biryani</strong> — slow-cooked, aromatic, the real deal. Not fast food biryani.</span>
               </div>
               <div className="beat-point">
-                <ChevronRight size={16} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
+                <ChevronRight size={24} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
                 <span><strong>Thali</strong> — unlimited rice, 3 curries, dal, rasam, pickle, papad, and dessert.</span>
               </div>
               <div className="beat-point">
-                <ChevronRight size={16} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
+                <ChevronRight size={24} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
                 <span><strong>Tiffins</strong> — idli, vada, dosa, upma, pongal. Breakfast done right.</span>
               </div>
               <div className="beat-point">
-                <ChevronRight size={16} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
+                <ChevronRight size={24} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
                 <span><strong>Snacks &amp; Chai</strong> — mirchi bajji, bonda, samosa. Perfect between lectures.</span>
               </div>
               <div className="beat-point">
-                <ChevronRight size={16} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
+                <ChevronRight size={24} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
                 <span><strong>Specials</strong> — rotating weekly dishes, seasonal curries, festival sweets.</span>
               </div>
             </div>
@@ -544,7 +595,7 @@ export default function ScrollSequence() {
               <p className="beat-sub">
                 Generous portions. Honest prices. The same warmth whether you are a fresher on your first day or a final-year regular who has eaten here a thousand times.
               </p>
-              <p className="beat-micro" style={{ color: "#B85E00", fontWeight: 600 }}>
+              <p className="beat-micro" style={{ color: "#E8810A", fontWeight: 600, fontSize: "clamp(14px, 3vw, 18px)", marginTop: "24px" }}>
                 Thali from ₹60 &nbsp;·&nbsp; Biryani from ₹80 &nbsp;·&nbsp; Tiffin from ₹30
               </p>
             </div>
@@ -555,14 +606,14 @@ export default function ScrollSequence() {
               <p className="beat-sub">
                 Come hungry. Leave happy. Bheemasena is not just a restaurant — it is a VIT-AP institution. Join thousands of students who call this place their second canteen, their comfort, their home away from home.
               </p>
-              <p className="beat-micro">
+              <p className="beat-micro" style={{ marginTop: "16px", letterSpacing: "1px", textTransform: "uppercase" }}>
                 Hotel Bheemasena &nbsp;·&nbsp; Mandadam – 522237 &nbsp;·&nbsp; Beside VIT-AP University
               </p>
               <div className="beat-btn-row">
                 <a href="/order" className="btn-primary">Order Now</a>
                 <a href="https://maps.google.com/?q=Bheemasena+family+restaurant+amaravati" target="_blank" rel="noopener noreferrer" className="btn-secondary">Get Directions</a>
               </div>
-              <p className="beat-micro" style={{ marginTop: "12px" }}>
+              <p className="beat-micro" style={{ marginTop: "32px", opacity: 0.6 }}>
                 Open daily · Breakfast, Lunch &amp; Dinner · Dine-in &amp; Takeaway
               </p>
             </div>
@@ -572,7 +623,7 @@ export default function ScrollSequence() {
       </section>
 
       {/* Decorative bottom border */}
-      <div style={{ width: "100%", height: "24px", background: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"24\" viewBox=\"0 0 40 24\"><path d=\"M20 0 L40 12 L20 24 L0 12 Z\" fill=\"none\" stroke=\"rgba(232, 129, 10, 0.25)\" stroke-width=\"1\"/></svg>') repeat-x center", zIndex: 10, position: "relative" }}></div>
+      <div style={{ width: "100%", height: "24px", background: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"24\" viewBox=\"0 0 40 24\"><path d=\"M20 0 L40 12 L20 24 L0 12 Z\" fill=\"none\" stroke=\"rgba(232, 129, 10, 0.25)\" stroke-width=\"1\"/></svg>') repeat-x center", zIndex: 10, position: "relative", backgroundColor: "#050505" }}></div>
     </>
   );
 }
