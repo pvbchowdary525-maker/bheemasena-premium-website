@@ -20,12 +20,8 @@ export default function ScrollSequence() {
     /* ── Canvas sizing (HiDPI / 4K aware) ── */
     function resizeCanvas() {
       const dpr = window.devicePixelRatio || 1;
-      const isMobile = window.innerWidth < 768;
-      const cssW = window.innerWidth;
-      const cssH = isMobile ? window.innerHeight * 0.6 : window.innerHeight;
-
-      canvas.width = Math.round(cssW * dpr);
-      canvas.height = Math.round(cssH * dpr);
+      canvas.width = Math.round(window.innerWidth * dpr);
+      canvas.height = Math.round(window.innerHeight * dpr);
       ctx!.setTransform(1, 0, 0, 1, 0, 0);
       ctx!.scale(dpr, dpr);
       ctx!.imageSmoothingEnabled = true;
@@ -42,27 +38,27 @@ export default function ScrollSequence() {
       const img = frames[index];
       if (!img || !img.complete) return;
 
-      const isMobile = window.innerWidth < 768;
-      const cssW = window.innerWidth;
-      const cssH = isMobile ? window.innerHeight * 0.6 : window.innerHeight;
-
+      const cW = window.innerWidth;
+      const cH = window.innerHeight;
       const iAR = img.naturalWidth / img.naturalHeight;
-      const cAR = cssW / cssH;
+      const cAR = cW / cH;
 
-      ctx!.clearRect(0, 0, cssW, cssH);
+      ctx!.clearRect(0, 0, cW, cH);
       ctx!.imageSmoothingEnabled = true;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (ctx as any).imageSmoothingQuality = 'high';
 
-      if (isMobile) {
+      if (window.innerWidth < 768) {
+        /* MOBILE — top-anchored: character's face always fully visible,
+           food items at bottom may be partially cropped — this is fine  */
         let drawW, drawH, offsetX;
         if (iAR > cAR) {
-          drawH = cssH;
+          drawH = cH;
           drawW = drawH * iAR;
-          offsetX = (cssW - drawW) / 2;
+          offsetX = (cW - drawW) / 2;
           ctx!.drawImage(img, offsetX, 0, drawW, drawH);
         } else {
-          drawW = cssW;
+          drawW = cW;
           drawH = drawW / iAR;
           ctx!.drawImage(img, 0, 0, drawW, drawH);
         }
@@ -70,14 +66,14 @@ export default function ScrollSequence() {
         /* DESKTOP — contain: full frame, centered with letterboxing */
         let drawW, drawH, offsetX, offsetY;
         if (iAR > cAR) {
-          drawW = cssW;
-          drawH = cssW / iAR;
+          drawW = cW;
+          drawH = cW / iAR;
           offsetX = 0;
-          offsetY = (cssH - drawH) / 2;
+          offsetY = (cH - drawH) / 2;
         } else {
-          drawH = cssH;
-          drawW = cssH * iAR;
-          offsetX = (cssW - drawW) / 2;
+          drawH = cH;
+          drawW = cH * iAR;
+          offsetX = (cW - drawW) / 2;
           offsetY = 0;
         }
         ctx!.drawImage(img, offsetX, offsetY, drawW, drawH);
@@ -169,152 +165,122 @@ export default function ScrollSequence() {
       <style dangerouslySetInnerHTML={{__html: `
         .beat {
           position: absolute;
-          width: auto;
-          max-width: 380px;
-          padding: 0;
-          background: none;
-          backdrop-filter: none;
-          -webkit-backdrop-filter: none;
-          border: none;
-          box-shadow: none;
-          border-radius: 0;
+          background: rgba(253, 246, 227, 0.72);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(232, 129, 10, 0.18);
+          box-shadow: 0 4px 24px rgba(232, 129, 10, 0.08);
+          border-radius: 18px;
+          padding: 24px 28px;
+          width: 90%;
+          max-width: 560px;
           opacity: 0;
           pointer-events: none;
           transition: opacity 0.45s ease, transform 0.45s ease;
           box-sizing: border-box;
+        }
+        
+        @media (max-width: 767px) {
+          .beat {
+            background: rgba(253, 246, 227, 0.82);
+            padding: 18px 20px;
+            border-radius: 14px;
+            width: 88%;
+          }
         }
         .beat.visible {
           opacity: 1;
           pointer-events: auto;
         }
 
-        @media (min-width: 768px) {
-          .beat::before {
-            content: '';
-            position: absolute;
-            inset: -12px -16px;
-            background: rgba(253, 246, 227, 0.55);
-            filter: blur(18px);
-            border-radius: 16px;
-            z-index: -1;
-            pointer-events: none;
-          }
-        }
-
-        /* Desktop specific positions */
+        /* Beat-specific positions and enter directions */
         #beat-1 {
-          top: 8%;
+          bottom: 10%;
           left: 50%;
-          transform: translateX(-50%) translateY(-10px);
+          transform: translateX(-50%) translateY(20px);
           text-align: center;
-          max-width: 500px;
         }
         #beat-1.visible { transform: translateX(-50%) translateY(0); }
 
         #beat-2 {
           top: 50%;
-          left: 3%;
-          transform: translateY(-50%) translateX(-20px);
-          text-align: left;
-          max-width: 340px;
+          left: 4%;
+          transform: translateY(-50%) translateX(-30px);
         }
         #beat-2.visible { transform: translateY(-50%) translateX(0); }
 
         #beat-3 {
           top: 50%;
-          right: 3%;
+          right: 4%;
           left: auto;
-          transform: translateY(-50%) translateX(20px);
-          text-align: right;
-          max-width: 340px;
+          transform: translateY(-50%) translateX(30px);
         }
         #beat-3.visible { transform: translateY(-50%) translateX(0); }
-        #beat-3 .beat-point { flex-direction: row-reverse; }
 
         #beat-4 {
-          bottom: 6%;
-          left: 3%;
-          transform: translateY(10px);
-          text-align: left;
-          max-width: 400px;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) scale(0.96);
+          text-align: center;
         }
-        #beat-4.visible { transform: translateY(0); }
+        #beat-4.visible { transform: translate(-50%, -50%) scale(1); }
 
         #beat-5 {
-          bottom: 4%;
+          top: 50%;
           left: 50%;
-          transform: translateX(-50%) translateY(10px);
+          transform: translate(-50%, -50%) translateY(20px);
           text-align: center;
-          max-width: 480px;
         }
-        #beat-5.visible { transform: translateX(-50%) translateY(0); }
+        #beat-5.visible { transform: translate(-50%, -50%) translateY(0); }
 
-        /* Typography inside beats (Desktop base) */
+        /* Typography inside beats */
         .beat-headline {
           font-family: 'Playfair Display', serif;
           font-weight: 800;
-          font-size: clamp(24px, 4.5vw, 46px);
+          font-size: clamp(22px, 5.5vw, 44px);
           color: #1A0A00;
           line-height: 1.15;
           margin: 0 0 10px 0;
-          text-shadow:
-            0 0 20px rgba(253, 246, 227, 0.95),
-            0 0 40px rgba(253, 246, 227, 0.80),
-            0 0 60px rgba(253, 246, 227, 0.60),
-            0 2px 4px rgba(253, 246, 227, 0.90);
         }
-        .beat-headline.saffron {
-          color: #B85E00;
-          text-shadow:
-            0 0 20px rgba(253, 246, 227, 0.95),
-            0 0 40px rgba(253, 246, 227, 0.80),
-            0 2px 4px rgba(253, 246, 227, 0.90);
-        }
+        .beat-headline.saffron { color: #C05E00; }
 
         .beat-sub {
           font-family: 'Poppins', sans-serif;
-          font-size: clamp(13px, 2.2vw, 15px);
-          color: #2C1200;
+          font-size: clamp(13px, 3vw, 16px);
+          color: rgba(26, 10, 0, 0.72);
           line-height: 1.65;
           margin: 0 0 8px 0;
-          text-shadow:
-            0 0 16px rgba(253, 246, 227, 0.98),
-            0 0 32px rgba(253, 246, 227, 0.85),
-            0 1px 3px rgba(253, 246, 227, 0.95);
         }
 
         .beat-micro {
           font-family: 'Poppins', sans-serif;
-          font-size: clamp(11px, 1.8vw, 13px);
-          color: rgba(44, 18, 0, 0.70);
+          font-size: clamp(11px, 2.5vw, 13px);
+          color: rgba(26, 10, 0, 0.50);
           line-height: 1.5;
           margin: 0;
-          text-shadow:
-            0 0 14px rgba(253, 246, 227, 0.98),
-            0 0 28px rgba(253, 246, 227, 0.85);
         }
 
         .beat-point {
           font-family: 'Poppins', sans-serif;
-          font-size: clamp(12px, 2vw, 14px);
-          color: #2C1200;
+          font-size: clamp(13px, 3vw, 15px);
+          color: rgba(26, 10, 0, 0.72);
           display: flex;
           align-items: flex-start;
           gap: 8px;
           margin-top: 10px;
           line-height: 1.5;
-          text-shadow:
-            0 0 16px rgba(253, 246, 227, 0.98),
-            0 0 32px rgba(253, 246, 227, 0.85);
         }
 
-        /* Buttons stay solid */
+        .beat-point span {
+          color: rgba(26, 10, 0, 0.72);
+        }
+
         .beat-btn-row {
           display: flex;
           gap: 12px;
           flex-wrap: wrap;
           justify-content: center;
-          margin-top: 18px;
+          margin-top: 22px;
         }
         .btn-primary {
           background: linear-gradient(135deg, #E8810A, #C0392B);
@@ -324,21 +290,20 @@ export default function ScrollSequence() {
           padding: 13px 26px;
           font-family: 'Poppins', sans-serif;
           font-weight: 700;
-          font-size: clamp(13px, 2.5vw, 15px);
+          font-size: clamp(13px, 3vw, 15px);
           cursor: pointer;
           text-decoration: none;
           display: inline-block;
-          box-shadow: 0 4px 16px rgba(232, 129, 10, 0.40);
         }
         .btn-secondary {
           border: 1.5px solid #E8810A;
-          color: #B85E00;
-          background: rgba(253, 246, 227, 0.70);
+          color: #E8810A;
+          background: transparent;
           border-radius: 12px;
           padding: 13px 26px;
           font-family: 'Poppins', sans-serif;
           font-weight: 600;
-          font-size: clamp(13px, 2.5vw, 15px);
+          font-size: clamp(13px, 3vw, 15px);
           cursor: pointer;
           text-decoration: none;
           display: inline-block;
@@ -347,113 +312,6 @@ export default function ScrollSequence() {
         #bheemasena-canvas {
           image-rendering: -webkit-optimize-contrast;
           image-rendering: crisp-edges;
-        }
-
-        /* ── MOBILE SPLIT-SCREEN LAYOUT ── */
-        @media (max-width: 767px) {
-          #sticky-stage {
-            display: flex !important;
-            flex-direction: column !important;
-          }
-
-          #bheemasena-canvas {
-            position: relative !important;
-            width: 100vw !important;
-            height: 60vh !important;
-            flex-shrink: 0 !important;
-            z-index: 1 !important;
-          }
-
-          #text-overlays {
-            position: relative !important;
-            width: 100% !important;
-            height: 40vh !important;
-            flex-shrink: 0 !important;
-            background: #FDF6E3 !important;
-            border-top: 2px solid rgba(232, 129, 10, 0.15) !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            z-index: 10 !important;
-            overflow: hidden !important;
-          }
-
-          .beat {
-            position: absolute;
-            top: 50% !important;
-            left: 50% !important;
-            bottom: auto !important;
-            right: auto !important;
-            transform: translate(-50%, -50%) translateY(10px) !important;
-            width: 92vw !important;
-            max-width: 92vw !important;
-            text-align: center !important;
-            padding: 0 16px !important;
-          }
-          .beat.visible {
-            transform: translate(-50%, -50%) translateY(0) !important;
-          }
-
-          #beat-3 .beat-point {
-            flex-direction: row;
-            justify-content: center;
-            text-align: center;
-          }
-
-          /* Text pill styles for mobile */
-          .beat-headline {
-            font-size: clamp(22px, 6vw, 32px);
-            text-shadow: none !important;
-            color: #1A0A00 !important;
-            background: rgba(253, 246, 227, 0.80);
-            border-radius: 6px;
-            padding: 3px 10px;
-            display: inline-block;
-            margin-bottom: 8px;
-          }
-          .beat-headline.saffron {
-            color: #B85E00 !important;
-          }
-
-          .beat-sub {
-            font-size: clamp(13px, 3.5vw, 15px);
-            text-shadow: none !important;
-            color: rgba(26, 10, 0, 0.72) !important;
-            background: rgba(253, 246, 227, 0.70);
-            border-radius: 4px;
-            padding: 2px 8px;
-            display: inline-block;
-            margin-bottom: 6px;
-          }
-
-          .beat-micro {
-            font-size: clamp(11px, 3vw, 13px);
-            text-shadow: none !important;
-            color: rgba(26, 10, 0, 0.50) !important;
-            background: rgba(253, 246, 227, 0.65);
-            border-radius: 4px;
-            padding: 2px 6px;
-            display: inline-block;
-            margin-bottom: 6px;
-          }
-
-          .beat-point {
-            font-size: clamp(12px, 3.2vw, 14px);
-            text-shadow: none !important;
-            justify-content: center;
-          }
-          .beat-point span {
-            background: rgba(253, 246, 227, 0.70);
-            border-radius: 4px;
-            padding: 2px 6px;
-            display: inline;
-          }
-
-          .beat-btn-row {
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-          }
         }
       `}} />
 
@@ -517,7 +375,7 @@ export default function ScrollSequence() {
                 }} 
               />
               <p className="beat-headline">Hotel Bheemasena</p>
-              <p className="beat-sub" style={{ fontWeight: 600, fontSize: "clamp(15px, 3.5vw, 20px)" }}>
+              <p className="beat-sub" style={{ color: "#E8810A", fontWeight: 600, fontSize: "clamp(15px, 3.5vw, 20px)" }}>
                 Where every meal feels like a celebration.
               </p>
               <p className="beat-micro">
@@ -559,7 +417,7 @@ export default function ScrollSequence() {
               <p className="beat-sub">
                 Great food shouldn&apos;t cost your whole month&apos;s pocket money. At Bheemasena, you eat well, spend smart, and leave happy — every single time.
               </p>
-              <p className="beat-sub" style={{ fontWeight: 600 }}>
+              <p className="beat-sub" style={{ color: "#E8810A", fontWeight: 600 }}>
                 Student-friendly prices. Generous portions. Always fresh. Always hot.
               </p>
             </div>
@@ -567,7 +425,7 @@ export default function ScrollSequence() {
             {/* Beat 5 — CTA */}
             <div id="beat-5" className="beat">
               <p className="beat-headline">Your next favourite<br/>meal is waiting.</p>
-              <p className="beat-micro" style={{ fontSize: "clamp(12px, 3vw, 14px)", marginBottom: "4px" }}>
+              <p className="beat-micro" style={{ fontSize: "clamp(12px, 3vw, 14px)", color: "rgba(26,10,0,0.55)", marginBottom: "4px" }}>
                 Hotel Bheemasena, Mandadam — 522237. Right beside VIT-AP University.
               </p>
               <div className="beat-btn-row">
