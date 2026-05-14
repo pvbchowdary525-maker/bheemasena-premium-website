@@ -8,13 +8,29 @@ export default function ScrollSequence() {
   const [loaderOpacity, setLoaderOpacity] = useState(1);
   const [isLoaderVisible, setIsLoaderVisible] = useState(true);
   const [loadedFramesCount, setLoadedFramesCount] = useState(0);
+  const [stageHeight, setStageHeight] = useState("100vh");
+  const [trackHeight, setTrackHeight] = useState("500vh");
 
   useEffect(() => {
+    setStageHeight(`${window.innerHeight}px`);
+    setTrackHeight(`${window.innerHeight * 5}px`);
+
     const frames: HTMLImageElement[] = [];
     let targetFrame = 0;
     let interpolatedFrame = 0;
     let lastDrawnFrame = -1;
     let loopRafId: number;
+    let cachedTrackTop = 0;
+    let cachedTotalScroll = 0;
+    let lastProgress = -1;
+
+    function cacheLayout() {
+      const track = document.getElementById("scroll-track");
+      if (!track) return;
+      const rect = track.getBoundingClientRect();
+      cachedTrackTop = window.scrollY + rect.top;
+      cachedTotalScroll = track.offsetHeight - window.innerHeight;
+    }
 
     // --- Canvas setup ---
     const canvas = document.getElementById("bheemasena-canvas") as HTMLCanvasElement;
@@ -35,6 +51,7 @@ export default function ScrollSequence() {
       (ctx as any).imageSmoothingQuality = 'high';
       lastDrawnFrame = -1;
       drawFrame(Math.round(interpolatedFrame));
+      cacheLayout();
     }
 
     window.addEventListener("resize", resizeCanvas);
@@ -110,27 +127,27 @@ export default function ScrollSequence() {
 
     /* ── Scroll handler (target update only) ── */
     function onScroll() {
-      const track = document.getElementById("scroll-track");
-      if (!track) return;
+      if (cachedTotalScroll === 0) cacheLayout(); // Initial fallback
       
-      const trackTop = track.getBoundingClientRect().top;
-      const totalScroll = track.offsetHeight - window.innerHeight;
-      const scrolled = Math.max(0, -trackTop);
-      const progress = Math.min(scrolled / totalScroll, 1); // 0.0 → 1.0
+      const scrolled = Math.max(0, window.scrollY - cachedTrackTop);
+      const progress = Math.min(scrolled / cachedTotalScroll, 1); // 0.0 → 1.0
 
       targetFrame = Math.min(
         Math.floor(progress * TOTAL_FRAMES),
         TOTAL_FRAMES - 1
       );
 
-      updateBeats(progress);
+      if (Math.abs(progress - lastProgress) > 0.001) {
+        lastProgress = progress;
+        updateBeats(progress);
+      }
     }
     
     window.addEventListener("scroll", onScroll, { passive: true });
 
     /* ── Animation Loop (Lerp) ── */
     function renderLoop() {
-      interpolatedFrame += (targetFrame - interpolatedFrame) * 0.12;
+      interpolatedFrame += (targetFrame - interpolatedFrame) * 0.18;
       const newFrame = Math.round(interpolatedFrame);
 
       if (newFrame !== lastDrawnFrame) {
@@ -144,6 +161,7 @@ export default function ScrollSequence() {
     /* ── Preload Lazy Queue (4 Waves) ── */
     function loadFrame(i: number) {
       const img = new Image();
+      img.loading = "eager";
       const num = String(i).padStart(3, '0');
       img.src = `/bheemasena-frames/ezgif-frame-${num}.jpg`;
       img.onload = () => {
@@ -177,6 +195,7 @@ export default function ScrollSequence() {
     loadFrame(1);
     
     // Initial calls
+    cacheLayout();
     onScroll();
 
     return () => {
@@ -221,6 +240,7 @@ export default function ScrollSequence() {
           position: absolute;
           width: 90%;
           max-width: 640px;
+          min-height: 400px;
           padding: 0;
           opacity: 0;
           pointer-events: none;
@@ -473,7 +493,7 @@ export default function ScrollSequence() {
         id="scroll-track"
         style={{
           position: "relative",
-          height: "500vh",
+          height: trackHeight,
           width: "100%",
           background: "#050505", 
         }}
@@ -485,7 +505,7 @@ export default function ScrollSequence() {
             top: 0,
             left: 0,
             width: "100vw",
-            height: "100vh",
+            height: stageHeight,
             overflow: "hidden",
             background: "#050505",
             willChange: "transform",

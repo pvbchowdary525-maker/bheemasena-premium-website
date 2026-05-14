@@ -12,11 +12,12 @@
 
   html {
     scroll-behavior: auto;
+    overscroll-behavior: none;
   }
   
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary;
-    overscroll-behavior-y: none;
+    overscroll-behavior: none;
   }
 
   *, *::before, *::after {
