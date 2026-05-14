@@ -81,13 +81,11 @@ export default function ScrollSequence() {
 
       let drawW, drawH, offsetX, offsetY;
       if (window.innerWidth < 768) {
-        // Mobile: custom scale to show character without extreme cropping or shrinking
-        const coverW = cH * iAR;
-        drawW = coverW * 0.65; // Show 65% of the cover width
-        if (drawW < cW) drawW = cW;
+        // Mobile: balanced zoom that fits character body horizontally
+        drawW = cW * 1.8; 
         drawH = drawW / iAR;
-        offsetX = (cW - drawW) / 2;
-        offsetY = (cH - drawH) / 2;
+        offsetX = (cW - drawW) / 2; // Center horizontally
+        offsetY = cH * 0.1; // Anchor slightly from top
       } else {
         /* Desktop: contain */
         if (iAR > cAR) {
@@ -239,13 +237,16 @@ export default function ScrollSequence() {
 
       <style dangerouslySetInnerHTML={{__html: `
         .beat {
-          position: absolute;
+          position: relative;
           width: 90%;
           max-width: 640px;
-          min-height: 400px;
-          padding: 0;
+          min-height: 100vh;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 20px 0;
           opacity: 0;
-          pointer-events: none;
           transform: translateY(60px);
           transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
           box-sizing: border-box;
@@ -254,7 +255,6 @@ export default function ScrollSequence() {
         
         .beat.visible {
           opacity: 1;
-          pointer-events: auto;
           transform: translateY(0);
         }
 
@@ -275,62 +275,38 @@ export default function ScrollSequence() {
         .beat.visible > *:nth-child(5) { transition-delay: 0.5s; }
         .beat.visible > *:nth-child(6) { transition-delay: 0.6s; }
 
-        /* Beat-specific positions */
+        /* Beat-specific styles */
         #beat-1 {
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) translateY(60px);
+          align-items: center;
           text-align: center;
         }
-        #beat-1.visible { transform: translate(-50%, -50%) translateY(0); }
-
         #beat-2 {
-          top: 50%;
-          left: 6%;
-          transform: translateY(-50%) translateX(-40px);
-          max-width: 520px;
+          align-items: flex-start;
+          text-align: left;
+          margin-left: 5%;
         }
-        #beat-2.visible { transform: translateY(-50%) translateX(0); }
-
         #beat-3 {
-          top: 50%;
-          right: 6%;
-          left: auto;
-          transform: translateY(-50%) translateX(40px);
+          align-items: flex-end;
           text-align: right;
-          max-width: 520px;
+          margin-right: 5%;
         }
-        #beat-3.visible { transform: translateY(-50%) translateX(0); }
         #beat-3 .beat-point { flex-direction: row-reverse; }
-
         #beat-4 {
-          top: 65%;
-          left: 6%;
-          transform: translateY(-50%) translateY(40px);
-          max-width: 520px;
+          align-items: flex-start;
+          text-align: left;
+          margin-left: 5%;
         }
-        #beat-4.visible { transform: translateY(-50%) translateY(0); }
-
         #beat-5 {
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) translateY(60px);
+          align-items: center;
           text-align: center;
         }
-        #beat-5.visible { transform: translate(-50%, -50%) translateY(0); }
 
         @media (max-width: 767px) {
           #beat-2, #beat-3, #beat-4 {
-            top: 50%;
-            left: 50%;
-            right: auto;
+            align-items: center;
             text-align: center;
-            transform: translate(-50%, -50%) translateY(40px);
-            width: 90%;
-            max-width: 100%;
-          }
-          #beat-2.visible, #beat-3.visible, #beat-4.visible {
-            transform: translate(-50%, -50%) translateY(0);
+            margin-left: auto;
+            margin-right: auto;
           }
           #beat-3 .beat-point {
             flex-direction: column;
@@ -545,16 +521,22 @@ export default function ScrollSequence() {
 
           <div id="canvas-vignette"></div>
 
-          <div
+      </div>
+
+      <section
+        id="scroll-track"
+        style={{
+          position: "relative",
+          width: "100%",
+          zIndex: 10,
+        }}
+      >
+        <div
             id="text-overlays"
             style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
+              position: "relative",
               width: "100%",
-              height: "100%",
               zIndex: 10,
-              pointerEvents: "none",
             }}
           >
             {/* Beat 1 — HERO */}
@@ -660,18 +642,7 @@ export default function ScrollSequence() {
             </div>
 
           </div>
-      </div>
-
-      <section
-        id="scroll-track"
-        style={{
-          position: "relative",
-          height: "500vh",
-          width: "100%",
-          zIndex: 1,
-          pointerEvents: "none",
-        }}
-      />
+      </section>
 
       {/* Decorative bottom border */}
       <div style={{ width: "100%", height: "24px", background: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"24\" viewBox=\"0 0 40 24\"><path d=\"M20 0 L40 12 L20 24 L0 12 Z\" fill=\"none\" stroke=\"rgba(232, 129, 10, 0.25)\" stroke-width=\"1\"/></svg>') repeat-x center", zIndex: 10, position: "relative", backgroundColor: "#050505" }}></div>
