@@ -63,7 +63,7 @@ export default function Navbar() {
       <motion.nav
         className="fixed top-0 left-0 w-full z-[100] transition-colors duration-300"
         style={{
-          backgroundColor: useTransform(bgOpacity, (op) => `rgba(255, 250, 240, ${op})`),
+          backgroundColor: useTransform(bgOpacity, (op) => `rgba(5, 5, 5, ${op})`),
           backdropFilter: useTransform(backdropBlur, (blur) => `blur(${blur}px)`),
           borderBottom: isScrolled ? "1px solid rgba(232,129,10,0.1)" : "none",
         }}
@@ -74,7 +74,7 @@ export default function Navbar() {
           <div className="md:hidden flex items-center">
             <button 
               onClick={() => setIsMenuOpen(true)}
-              className="p-2 -ml-2 text-foreground hover:text-primary transition-colors"
+              className="p-2 -ml-2 text-[#FDF6E3] hover:text-primary transition-colors"
               aria-label="Open menu"
             >
               <Menu strokeWidth={2} size={24} />
@@ -83,7 +83,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center justify-center flex-1 md:flex-none">
-            <Logo className="h-[36px] w-auto" textClass="text-lg" />
+            <Logo className="h-[36px] w-auto rounded-md shadow-lg" textClass="text-lg text-[#FDF6E3]" />
           </Link>
 
           {/* Desktop Links */}
@@ -92,7 +92,7 @@ export default function Navbar() {
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-sm font-medium text-foreground/80 hover:text-primary transition-all duration-300"
+                className="text-sm font-medium text-[#FDF6E3]/80 hover:text-primary transition-all duration-300"
               >
                 {link.name}
               </Link>
@@ -128,9 +128,9 @@ export default function Navbar() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute right-0 mt-2 w-48 bg-[#FFFAF0] border border-[rgba(232,129,10,0.20)] rounded-[12px] p-2 shadow-[0_8px_24px_rgba(232,129,10,0.15)] z-[110]"
+                    className="absolute right-0 mt-2 w-48 bg-[#141414] border border-[rgba(232,129,10,0.20)] rounded-[12px] p-2 shadow-[0_8px_24px_rgba(232,129,10,0.15)] z-[110]"
                   >
-                    <Link href="/order" className="flex items-center gap-3 w-full p-2 text-[14px] font-medium text-foreground hover:bg-[rgba(232,129,10,0.08)] hover:text-primary rounded-lg transition-colors">
+                    <Link href="/order" className="flex items-center gap-3 w-full p-2 text-[14px] font-medium text-[#FDF6E3] hover:bg-[rgba(232,129,10,0.08)] hover:text-primary rounded-lg transition-colors">
                       <ClipboardList size={16} /> My Orders
                     </Link>
                     <button onClick={handleLogout} className="flex items-center gap-3 w-full p-2 text-[14px] font-medium text-[#C0392B] hover:bg-red-50 rounded-lg transition-colors text-left mt-1">
@@ -146,8 +146,8 @@ export default function Navbar() {
               className="relative group overflow-hidden rounded-full p-[2px] flex-shrink-0"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-full opacity-80 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_15px_rgba(232,129,10,0.5)] group-hover:shadow-[0_0_25px_rgba(232,129,10,0.8)]" />
-              <div className="relative px-3 py-1.5 sm:px-5 sm:py-2 bg-[#FFF8ED] rounded-full transition-colors duration-300 group-hover:bg-opacity-90">
-                <span className="relative z-10 text-[11px] sm:text-sm font-semibold text-foreground group-hover:text-primary transition-colors whitespace-nowrap">
+              <div className="relative px-3 py-1.5 sm:px-5 sm:py-2 bg-[#141414] rounded-full transition-colors duration-300 group-hover:bg-opacity-90">
+                <span className="relative z-10 text-[11px] sm:text-sm font-semibold text-[#FDF6E3] group-hover:text-primary transition-colors whitespace-nowrap">
                   Visit Us Today
                 </span>
               </div>
@@ -178,13 +178,13 @@ export default function Navbar() {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed top-0 left-0 h-full w-[80vw] max-w-[280px] bg-[#FDF6E3] border-l-[3px] border-l-[#E8810A] z-[160] shadow-2xl flex flex-col md:hidden"
+            className="fixed top-0 left-0 h-full w-[80vw] max-w-[280px] bg-[#050505] border-r-[1px] border-r-[rgba(232,129,10,0.2)] z-[160] shadow-2xl flex flex-col md:hidden"
           >
             <div className="flex items-center justify-between p-4 border-b border-[rgba(232,129,10,0.15)]">
-              <Logo className="h-8 w-auto" textClass="text-base" />
+              <Logo className="h-8 w-auto rounded-md" textClass="text-base text-[#FDF6E3]" />
               <button 
                 onClick={() => setIsMenuOpen(false)}
-                className="p-2 text-foreground hover:text-primary transition-colors"
+                className="p-2 text-[#FDF6E3] hover:text-primary transition-colors"
               >
                 <X strokeWidth={2} size={20} />
               </button>
@@ -197,7 +197,7 @@ export default function Navbar() {
                     key={link.name}
                     href={link.href}
                     onClick={() => setIsMenuOpen(false)}
-                    className="text-[18px] font-semibold text-[#1A0A00] px-6 py-4 border-b border-[rgba(232,129,10,0.15)] hover:bg-[rgba(232,129,10,0.10)] hover:text-[#E8810A] transition-colors min-h-[52px] flex items-center"
+                    className="text-[18px] font-semibold text-[#FDF6E3] px-6 py-4 border-b border-[rgba(232,129,10,0.15)] hover:bg-[rgba(232,129,10,0.10)] hover:text-[#E8810A] transition-colors min-h-[52px] flex items-center"
                   >
                     {link.name}
                   </Link>
