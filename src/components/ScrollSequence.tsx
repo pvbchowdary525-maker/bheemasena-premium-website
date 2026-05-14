@@ -79,18 +79,28 @@ export default function ScrollSequence() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (ctx as any).imageSmoothingQuality = 'high';
 
-      /* Universal contain: full frame, centered with letterboxing */
       let drawW, drawH, offsetX, offsetY;
-      if (iAR > cAR) {
-        drawW = cW;
-        drawH = cW / iAR;
-        offsetX = 0;
+      if (window.innerWidth < 768) {
+        // Mobile: custom scale to show character without extreme cropping or shrinking
+        const coverW = cH * iAR;
+        drawW = coverW * 0.65; // Show 65% of the cover width
+        if (drawW < cW) drawW = cW;
+        drawH = drawW / iAR;
+        offsetX = (cW - drawW) / 2;
         offsetY = (cH - drawH) / 2;
       } else {
-        drawH = cH;
-        drawW = cH * iAR;
-        offsetX = (cW - drawW) / 2;
-        offsetY = 0;
+        /* Desktop: contain */
+        if (iAR > cAR) {
+          drawW = cW;
+          drawH = cW / iAR;
+          offsetX = 0;
+          offsetY = (cH - drawH) / 2;
+        } else {
+          drawH = cH;
+          drawW = cH * iAR;
+          offsetX = (cW - drawW) / 2;
+          offsetY = 0;
+        }
       }
       ctx!.drawImage(img, offsetX, offsetY, drawW, drawH);
     }
@@ -481,30 +491,22 @@ export default function ScrollSequence() {
         </svg>
       </div>
 
-      <section
-        id="scroll-track"
+      <div
+        id="sticky-stage"
         style={{
-          position: "relative",
-          height: "500vh",
-          width: "100%",
-          background: "#050505", 
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          overflow: "hidden",
+          background: "#050505",
+          willChange: "transform",
+          transform: "translateZ(0)",
+          backfaceVisibility: "hidden",
+          zIndex: 0,
         }}
       >
-        <div
-          id="sticky-stage"
-          style={{
-            position: "sticky",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            overflow: "hidden",
-            background: "#050505",
-            willChange: "transform",
-            transform: "translateZ(0)",
-            backfaceVisibility: "hidden",
-          }}
-        >
           {/* Lotus top left */}
           <svg viewBox="0 0 100 100" className="myth-symbol" style={{ top: "20px", left: "20px", width: "80px", height: "80px" }}>
             <path d="M50 95 C20 95 5 70 5 50 C25 35 40 45 50 60 C60 45 75 35 95 50 C95 70 80 95 50 95 M50 95 C30 75 25 35 50 5 C75 35 70 75 50 95" />
@@ -658,8 +660,18 @@ export default function ScrollSequence() {
             </div>
 
           </div>
-        </div>
-      </section>
+      </div>
+
+      <section
+        id="scroll-track"
+        style={{
+          position: "relative",
+          height: "500vh",
+          width: "100%",
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      />
 
       {/* Decorative bottom border */}
       <div style={{ width: "100%", height: "24px", background: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"24\" viewBox=\"0 0 40 24\"><path d=\"M20 0 L40 12 L20 24 L0 12 Z\" fill=\"none\" stroke=\"rgba(232, 129, 10, 0.25)\" stroke-width=\"1\"/></svg>') repeat-x center", zIndex: 10, position: "relative", backgroundColor: "#050505" }}></div>
