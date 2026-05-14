@@ -7,16 +7,20 @@ export default function ScrollSequence() {
   const TOTAL_FRAMES = 240;
   const [loaderOpacity, setLoaderOpacity] = useState(1);
   const [isLoaderVisible, setIsLoaderVisible] = useState(true);
+  const [loadedFramesCount, setLoadedFramesCount] = useState(0);
 
   useEffect(() => {
     const frames: HTMLImageElement[] = [];
-    let currentFrame = 0;
-    let rafPending = false;
+    let targetFrame = 0;
+    let interpolatedFrame = 0;
+    let lastDrawnFrame = -1;
+    let loopRafId: number;
 
     // --- Canvas setup ---
     const canvas = document.getElementById("bheemasena-canvas") as HTMLCanvasElement;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d", { willReadFrequently: false, alpha: false });
+    // @ts-ignore - desynchronized is a valid property but not in all TS definitions
+    const ctx = canvas.getContext("2d", { willReadFrequently: false, alpha: false, desynchronized: true });
     if (!ctx) return;
 
     /* ── Canvas sizing (HiDPI / 4K aware) ── */
@@ -29,7 +33,8 @@ export default function ScrollSequence() {
       ctx!.imageSmoothingEnabled = true;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (ctx as any).imageSmoothingQuality = 'high';
-      drawFrame(currentFrame);
+      lastDrawnFrame = -1;
+      drawFrame(Math.round(interpolatedFrame));
     }
 
     window.addEventListener("resize", resizeCanvas);
@@ -103,59 +108,73 @@ export default function ScrollSequence() {
       });
     }
 
-    /* ── Scroll handler (RAF-throttled) ── */
+    /* ── Scroll handler (target update only) ── */
     function onScroll() {
-      if (rafPending) return;
-      rafPending = true;
-      requestAnimationFrame(() => {
-        rafPending = false;
+      const track = document.getElementById("scroll-track");
+      if (!track) return;
+      
+      const trackTop = track.getBoundingClientRect().top;
+      const totalScroll = track.offsetHeight - window.innerHeight;
+      const scrolled = Math.max(0, -trackTop);
+      const progress = Math.min(scrolled / totalScroll, 1); // 0.0 → 1.0
 
-        const track = document.getElementById("scroll-track");
-        if (!track) return;
-        
-        const trackTop = track.getBoundingClientRect().top;
-        const totalScroll = track.offsetHeight - window.innerHeight;
-        const scrolled = Math.max(0, -trackTop);
-        const progress = Math.min(scrolled / totalScroll, 1); // 0.0 → 1.0
+      targetFrame = Math.min(
+        Math.floor(progress * TOTAL_FRAMES),
+        TOTAL_FRAMES - 1
+      );
 
-        const frameIndex = Math.min(
-          Math.floor(progress * TOTAL_FRAMES),
-          TOTAL_FRAMES - 1
-        );
-        if (frameIndex !== currentFrame) {
-          currentFrame = frameIndex;
-          drawFrame(currentFrame);
-        }
-
-        updateBeats(progress);
-      });
+      updateBeats(progress);
     }
     
     window.addEventListener("scroll", onScroll, { passive: true });
 
-    /* ── Preload Lazy Queue ── */
+    /* ── Animation Loop (Lerp) ── */
+    function renderLoop() {
+      interpolatedFrame += (targetFrame - interpolatedFrame) * 0.12;
+      const newFrame = Math.round(interpolatedFrame);
+
+      if (newFrame !== lastDrawnFrame) {
+        lastDrawnFrame = newFrame;
+        drawFrame(newFrame);
+      }
+      loopRafId = requestAnimationFrame(renderLoop);
+    }
+    loopRafId = requestAnimationFrame(renderLoop);
+
+    /* ── Preload Lazy Queue (4 Waves) ── */
     function loadFrame(i: number) {
       const img = new Image();
       const num = String(i).padStart(3, '0');
       img.src = `/bheemasena-frames/ezgif-frame-${num}.jpg`;
       img.onload = () => {
+        setLoadedFramesCount(prev => prev + 1);
         img.decode().catch(() => {}); // decode async, ignore errors
         if (i === 1) {
           resizeCanvas();
+          lastDrawnFrame = 0;
           drawFrame(0);
           setLoaderOpacity(0);
           setTimeout(() => setIsLoaderVisible(false), 500);
-          // Wave 2
+          
+          // Wave 2: frames 2-20 right after frame 1
+          for (let j = 2; j <= 20; j++) loadFrame(j);
+          
+          // Wave 3: frames 21-100 after 300ms
           setTimeout(() => {
-            for (let j = 11; j <= TOTAL_FRAMES; j++) loadFrame(j);
-          }, 100);
+            for (let j = 21; j <= 100; j++) loadFrame(j);
+          }, 300);
+          
+          // Wave 4: frames 101-240 after 800ms
+          setTimeout(() => {
+            for (let j = 101; j <= TOTAL_FRAMES; j++) loadFrame(j);
+          }, 800);
         }
       };
       frames[i - 1] = img;
     }
 
     // Wave 1
-    for (let i = 1; i <= 10; i++) loadFrame(i);
+    loadFrame(1);
     
     // Initial calls
     onScroll();
@@ -164,6 +183,7 @@ export default function ScrollSequence() {
       window.removeEventListener("resize", resizeCanvas);
       window.removeEventListener("orientationchange", resizeCanvas);
       window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(loopRafId);
     };
   }, []);
 
@@ -187,21 +207,16 @@ export default function ScrollSequence() {
           <div style={{ width: "160px", height: "3px", background: "rgba(232,129,10,0.20)", borderRadius: "999px", overflow: "hidden" }}>
             <div id="loader-bar" style={{ 
               height: "100%", 
-              width: "100%", 
+              width: `${Math.max(5, (loadedFramesCount / TOTAL_FRAMES) * 100)}%`, 
               background: "linear-gradient(90deg, #E8810A, #C0392B)", 
               borderRadius: "999px",
-              animation: "loadPulse 1.5s infinite ease-in-out" 
+              transition: "width 0.2s ease-out" 
             }}></div>
           </div>
         </div>
       )}
 
       <style dangerouslySetInnerHTML={{__html: `
-        @keyframes loadPulse {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-
         .beat {
           position: absolute;
           width: 90%;
@@ -406,6 +421,9 @@ export default function ScrollSequence() {
           image-rendering: crisp-edges;
           opacity: 0.25;
           transition: opacity 0.5s ease;
+          will-change: transform;
+          transform: translateZ(0);
+          backface-visibility: hidden;
         }
 
         #canvas-vignette {
@@ -470,6 +488,9 @@ export default function ScrollSequence() {
             height: "100vh",
             overflow: "hidden",
             background: "#050505",
+            willChange: "transform",
+            transform: "translateZ(0)",
+            backfaceVisibility: "hidden",
           }}
         >
           {/* Lotus top left */}
@@ -502,6 +523,9 @@ export default function ScrollSequence() {
               width: "100%",
               height: "100%",
               zIndex: 1,
+              willChange: "transform",
+              transform: "translateZ(0)",
+              backfaceVisibility: "hidden",
             }}
           ></canvas>
 

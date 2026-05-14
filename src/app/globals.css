@@ -9,10 +9,14 @@
     width: 100%;
     min-width: 0;
   }
+
+  html {
+    scroll-behavior: auto;
+  }
   
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary;
-    scroll-behavior: smooth;
+    overscroll-behavior-y: none;
   }
 
   *, *::before, *::after {
