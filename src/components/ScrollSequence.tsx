@@ -37,50 +37,50 @@ export default function ScrollSequence() {
     setImages(loadedImages);
   }, []);
 
-  // Draw frame on canvas based on scroll
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (!loaded || !canvasRef.current || images.length === 0) return;
-
+  const renderFrame = (latest: number) => {
+    if (!canvasRef.current || images.length === 0) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const frameIndex = Math.min(Math.floor(latest * TOTAL_FRAMES), TOTAL_FRAMES - 1);
     const image = images[frameIndex];
-
     if (!image) return;
 
-    // Set canvas dimensions to match window
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    // Calculate aspect ratio to cover or contain
-    // The prompt says "centered and scaled to fit while preserving aspect ratio", which usually means `contain` for exact matches,
-    // but to avoid edges, maybe `cover` or fit carefully. Since background is white, `contain` works perfectly and blends with the page.
-    const hRatio = canvas.width / image.width;
-    const vRatio = canvas.height / image.height;
-    const ratio = Math.min(hRatio, vRatio); // Use Math.min for contain, Math.max for cover
-
-    const centerShift_x = (canvas.width - image.width * ratio) / 2;
-    const centerShift_y = (canvas.height - image.height * ratio) / 2;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Draw background color (optional, since page bg is white, but good for canvas)
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const dpr = window.devicePixelRatio || 1;
+    // Set actual size in memory (scaled to account for extra pixel density)
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
     
-    ctx.drawImage(
-      image,
-      0,
-      0,
-      image.width,
-      image.height,
-      centerShift_x,
-      centerShift_y,
-      image.width * ratio,
-      image.height * ratio
-    );
-  });
+    // Normalize coordinate system to use css pixels
+    ctx.scale(dpr, dpr);
+
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    
+    // Draw background color
+    ctx.fillStyle = "#FFFAF0";
+    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+    
+    // Stretch/cover full canvas
+    ctx.drawImage(image, 0, 0, window.innerWidth, window.innerHeight);
+  };
+
+  useMotionValueEvent(scrollYProgress, "change", renderFrame);
+
+  // Re-render canvas on window resize
+  useEffect(() => {
+    if (!loaded) return;
+    
+    // Initial render when loaded
+    renderFrame(scrollYProgress.get());
+    
+    const handleResize = () => {
+      renderFrame(scrollYProgress.get());
+    };
+    
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [loaded, images, scrollYProgress]);
 
   // Story Beat Opacities
   // 0–15%: Hero / Intro
@@ -105,47 +105,51 @@ export default function ScrollSequence() {
   return (
     <div ref={containerRef} className="relative w-full" style={{ height: "500vh" }}>
       {/* Sticky Canvas Container */}
-      <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
+      <div className="sticky top-0 left-0 w-[100vw] h-[100vh] overflow-hidden m-0 p-0 max-w-none">
+        
         {/* Subtle radial glow behind the hero */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
           <div className="w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-primary/5 rounded-full blur-[100px]"></div>
         </div>
 
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full z-10" />
+        {/* Set canvas to 100vw and 100vh explicitly via inline styles */}
+        <canvas ref={canvasRef} className="absolute inset-0 z-10 block m-0 p-0" style={{ width: "100vw", height: "100vh", maxWidth: "100vw" }} />
 
         {/* Text Overlays - Z-Index above canvas */}
-        <div className="absolute inset-0 z-20 pointer-events-none">
-          <div className="max-w-7xl mx-auto px-6 h-full relative">
+        <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center w-full h-full">
+          <div className="w-full max-w-7xl mx-auto h-full relative">
             
             {/* Beat 1: Hero */}
             <motion.div 
               style={{ opacity: opacityBeat1 }}
-              className="absolute inset-0 flex flex-col items-center justify-center text-center mt-20"
+              className="absolute inset-0 flex flex-col items-center justify-center mt-20"
             >
-              <h1 className="font-serif text-6xl md:text-8xl font-bold text-gradient-dark mb-6 drop-shadow-sm">
-                Hotel Bheemasena
-              </h1>
-              <p className="font-sans text-xl md:text-2xl font-medium text-foreground mb-4">
-                Where every meal feels like a celebration.
-              </p>
-              <p className="font-sans text-sm md:text-base text-muted max-w-lg">
-                Serving the hungry hearts of VIT-AP University — right here in Mandadam.
-              </p>
+              <div className="w-[90vw] md:max-w-xl mx-auto p-[16px_20px] md:p-10 rounded-[14px] md:rounded-3xl bg-[rgba(255,248,237,0.85)] md:bg-white/40 backdrop-blur-[10px] md:backdrop-blur-md border border-[rgba(232,129,10,0.20)] shadow-xl text-center pointer-events-auto">
+                <h1 className="font-serif font-bold text-gradient-dark mb-4 drop-shadow-sm leading-tight" style={{ fontSize: 'clamp(28px, 7vw, 64px)' }}>
+                  Hotel Bheemasena
+                </h1>
+                <p className="font-sans font-medium text-foreground mb-4" style={{ fontSize: 'clamp(14px, 3.5vw, 18px)' }}>
+                  Where every meal feels like a celebration.
+                </p>
+                <p className="font-sans text-muted" style={{ fontSize: 'clamp(14px, 3.5vw, 16px)' }}>
+                  Serving the hungry hearts of VIT-AP University — right here in Mandadam.
+                </p>
+              </div>
             </motion.div>
 
             {/* Beat 2: First Bite */}
             <motion.div 
               style={{ opacity: opacityBeat2, y: yBeat2 }}
-              className="absolute inset-0 flex flex-col items-start justify-center text-left"
+              className="absolute inset-0 flex flex-col items-center md:items-start justify-center"
             >
-              <div className="max-w-md bg-white/40 backdrop-blur-md p-8 rounded-2xl border border-white/20 shadow-xl">
-                <h2 className="font-serif text-4xl md:text-5xl font-bold text-gradient-dark mb-6">
+              <div className="w-[90vw] md:max-w-md mx-auto md:ml-[10%] p-[16px_20px] md:p-8 rounded-[14px] md:rounded-2xl bg-[rgba(255,248,237,0.85)] md:bg-white/40 backdrop-blur-[10px] md:backdrop-blur-md border border-[rgba(232,129,10,0.20)] shadow-xl text-center md:text-left pointer-events-auto">
+                <h2 className="font-serif font-bold text-gradient-dark mb-4 leading-tight" style={{ fontSize: 'clamp(28px, 6vw, 48px)' }}>
                   Made with love.<br/>Served with soul.
                 </h2>
-                <p className="font-sans text-lg text-foreground font-medium mb-4">
+                <p className="font-sans text-foreground font-medium mb-4" style={{ fontSize: 'clamp(14px, 3.5vw, 18px)' }}>
                   Every dish at Bheemasena is crafted fresh, packed with flavour, and priced for students who deserve the best.
                 </p>
-                <p className="font-sans text-base text-muted">
+                <p className="font-sans text-muted" style={{ fontSize: 'clamp(14px, 3.5vw, 16px)' }}>
                   From morning tiffins to hearty rice meals — your day starts and ends better here.
                 </p>
               </div>
@@ -154,21 +158,21 @@ export default function ScrollSequence() {
             {/* Beat 3: The Feast */}
             <motion.div 
               style={{ opacity: opacityBeat3, y: yBeat3 }}
-              className="absolute inset-0 flex flex-col items-end justify-center text-right"
+              className="absolute inset-0 flex flex-col items-center md:items-end justify-center"
             >
-              <div className="max-w-md bg-white/40 backdrop-blur-md p-8 rounded-2xl border border-white/20 shadow-xl text-left md:text-right">
-                <h2 className="font-serif text-4xl md:text-5xl font-bold text-gradient-dark mb-6">
+              <div className="w-[90vw] md:max-w-md mx-auto md:mr-[10%] p-[16px_20px] md:p-8 rounded-[14px] md:rounded-2xl bg-[rgba(255,248,237,0.85)] md:bg-white/40 backdrop-blur-[10px] md:backdrop-blur-md border border-[rgba(232,129,10,0.20)] shadow-xl text-center md:text-right pointer-events-auto">
+                <h2 className="font-serif font-bold text-gradient-dark mb-4 leading-tight" style={{ fontSize: 'clamp(28px, 6vw, 48px)' }}>
                   A menu built for every craving.
                 </h2>
-                <ul className="space-y-4 font-sans text-lg text-foreground font-medium">
-                  <li className="flex items-center justify-end gap-3">
-                    Biryani that hits different after a long lab session. <span className="text-primary text-xl">•</span>
+                <ul className="space-y-4 font-sans text-foreground font-medium" style={{ fontSize: 'clamp(14px, 3.5vw, 18px)' }}>
+                  <li className="flex flex-col md:flex-row items-center justify-center md:justify-end gap-2 md:gap-3">
+                    <span>Biryani that hits different after a long lab session.</span> <span className="hidden md:inline text-primary text-xl">•</span>
                   </li>
-                  <li className="flex items-center justify-end gap-3">
-                    Thali plates loaded with variety — rice, curries, dal, pickle, papad. <span className="text-secondary text-xl">•</span>
+                  <li className="flex flex-col md:flex-row items-center justify-center md:justify-end gap-2 md:gap-3">
+                    <span>Thali plates loaded with variety — rice, curries, dal.</span> <span className="hidden md:inline text-secondary text-xl">•</span>
                   </li>
-                  <li className="flex items-center justify-end gap-3">
-                    Quick snacks, cold drinks, and chai breaks — we&apos;ve got your whole day. <span className="text-tertiary text-xl">•</span>
+                  <li className="flex flex-col md:flex-row items-center justify-center md:justify-end gap-2 md:gap-3">
+                    <span>Quick snacks, cold drinks, and chai breaks.</span> <span className="hidden md:inline text-tertiary text-xl">•</span>
                   </li>
                 </ul>
               </div>
@@ -177,16 +181,16 @@ export default function ScrollSequence() {
             {/* Beat 4: Satisfaction */}
             <motion.div 
               style={{ opacity: opacityBeat4, y: yBeat4 }}
-              className="absolute inset-0 flex flex-col items-center justify-center text-center mt-32"
+              className="absolute inset-0 flex flex-col items-center justify-center mt-32"
             >
-              <div className="max-w-2xl bg-white/40 backdrop-blur-md p-10 rounded-3xl border border-white/20 shadow-xl">
-                <h2 className="font-serif text-5xl md:text-6xl font-bold text-gradient-dark mb-6">
+              <div className="w-[90vw] md:max-w-2xl mx-auto p-[16px_20px] md:p-10 rounded-[14px] md:rounded-3xl bg-[rgba(255,248,237,0.85)] md:bg-white/40 backdrop-blur-[10px] md:backdrop-blur-md border border-[rgba(232,129,10,0.20)] shadow-xl text-center pointer-events-auto">
+                <h2 className="font-serif font-bold text-gradient-dark mb-4 leading-tight" style={{ fontSize: 'clamp(32px, 7vw, 60px)' }}>
                   Full stomach.<br/>Happy heart.
                 </h2>
-                <p className="font-sans text-xl text-foreground font-medium mb-4">
+                <p className="font-sans text-foreground font-medium mb-4" style={{ fontSize: 'clamp(14px, 3.5vw, 20px)' }}>
                   Great food shouldn&apos;t cost your whole month&apos;s pocket money. At Bheemasena, you eat well, spend smart, and leave happy — every single time.
                 </p>
-                <p className="font-sans text-lg text-primary font-semibold">
+                <p className="font-sans font-semibold text-primary" style={{ fontSize: 'clamp(14px, 3.5vw, 18px)' }}>
                   Student-friendly prices. Generous portions. Always fresh. Always hot.
                 </p>
               </div>
@@ -195,32 +199,32 @@ export default function ScrollSequence() {
             {/* Beat 5: Final Frame & CTA */}
             <motion.div 
               style={{ opacity: opacityBeat5, y: yBeat5 }}
-              className="absolute inset-0 flex flex-col items-center justify-center text-center mt-40 pointer-events-auto"
+              className="absolute inset-0 flex flex-col items-center justify-center mt-40 pointer-events-auto"
             >
-              <div className="max-w-xl bg-white/60 backdrop-blur-xl p-10 rounded-3xl border border-primary/20 shadow-2xl">
-                <h2 className="font-serif text-4xl md:text-5xl font-bold text-gradient-dark mb-4">
+              <div className="w-[90vw] md:max-w-xl mx-auto p-[16px_20px] md:p-10 rounded-[14px] md:rounded-3xl bg-[rgba(255,248,237,0.85)] md:bg-white/60 backdrop-blur-[10px] md:backdrop-blur-xl border border-[rgba(232,129,10,0.20)] shadow-2xl text-center">
+                <h2 className="font-serif font-bold text-gradient-dark mb-4 leading-tight" style={{ fontSize: 'clamp(28px, 6vw, 48px)' }}>
                   Your next favourite meal is waiting.
                 </h2>
-                <p className="font-sans text-lg text-foreground font-medium mb-8">
+                <p className="font-sans text-foreground font-medium mb-6 md:mb-8" style={{ fontSize: 'clamp(14px, 3.5vw, 18px)' }}>
                   Hotel Bheemasena, Mandadam — 522237.<br/>Right beside VIT-AP University.
                 </p>
                 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-6">
-                  <button className="relative group overflow-hidden rounded-full p-[3px]">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 mb-4 md:mb-6">
+                  <a href="/order" className="w-full sm:w-auto relative group overflow-hidden rounded-full p-[3px] block">
                     <span className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-full opacity-100 group-hover:opacity-80 transition-opacity duration-300 shadow-[0_0_20px_rgba(232,129,10,0.6)] group-hover:shadow-[0_0_30px_rgba(232,129,10,0.9)]" />
-                    <div className="relative px-8 py-3 bg-gradient-to-r from-primary to-secondary rounded-full transition-colors duration-300">
-                      <span className="relative z-10 text-lg font-bold text-white drop-shadow-md">
+                    <div className="relative px-8 py-3 bg-gradient-to-r from-primary to-secondary rounded-full transition-colors duration-300 w-full">
+                      <span className="relative z-10 font-bold text-white drop-shadow-md text-base md:text-lg block text-center">
                         See Our Menu
                       </span>
                     </div>
-                  </button>
+                  </a>
                   
-                  <a href="#" className="font-sans text-lg font-semibold text-secondary hover:text-primary transition-colors underline-offset-4 hover:underline">
+                  <a href="#location" className="font-sans font-semibold text-secondary hover:text-primary transition-colors underline-offset-4 hover:underline" style={{ fontSize: 'clamp(14px, 3.5vw, 18px)' }}>
                     Get Directions
                   </a>
                 </div>
                 
-                <p className="font-sans text-sm text-muted">
+                <p className="font-sans text-muted" style={{ fontSize: 'clamp(12px, 3vw, 14px)' }}>
                   Open daily. Serving students, faculty, and food lovers since day one.
                 </p>
               </div>

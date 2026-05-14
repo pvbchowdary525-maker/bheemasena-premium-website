@@ -3,10 +3,21 @@
 @tailwind utilities;
 
 @layer base {
+  html, body {
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-width: 0;
+  }
+  
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary;
-    /* Make sure scrolling feels smooth if they manually scroll */
     scroll-behavior: smooth;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
   }
 }
 
@@ -17,5 +28,14 @@
   
   .text-gradient-dark {
     @apply bg-clip-text text-transparent bg-gradient-to-b from-foreground to-primary;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }

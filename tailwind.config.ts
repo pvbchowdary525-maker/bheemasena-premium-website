@@ -9,10 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#ffffff",
+        background: "#FFFAF0",
+        cream: "#FFF8ED",
         foreground: "#1A0A00",
         primary: {
-          DEFAULT: "#E8810A", // Deep saffron / turmeric gold
+          DEFAULT: "#E8810A", // Deep saffron
         },
         secondary: {
           DEFAULT: "#C0392B", // Chili red
@@ -20,7 +21,7 @@ const config: Config = {
         tertiary: {
           DEFAULT: "#2E7D32", // Curry green
         },
-        muted: "rgba(30,10,0,0.65)", // Muted warm tone for body text
+        muted: "rgba(26,10,0,0.55)",
       },
       fontFamily: {
         sans: ["var(--font-poppins)"],
