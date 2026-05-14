@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Logo from "@/components/Logo";
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,7 +31,7 @@ export default function LoginPage() {
       
       <div className="relative z-10 w-[90vw] max-w-[400px] bg-[rgba(232,129,10,0.06)] border border-[rgba(232,129,10,0.20)] rounded-[20px] p-[40px_32px]">
         <div className="flex justify-center mb-[24px]">
-          <Logo className="h-[64px] w-auto" />
+          <span className="font-serif font-bold text-[#E8810A] text-4xl">Hotel Bheemasena</span>
         </div>
         
         <div className="text-center mb-6">

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Search, Square, ShoppingCart, Trash2, X, ArrowLeft } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import Logo from "@/components/Logo";
+
 
 type MenuItem = {
   id: string;
@@ -139,7 +139,7 @@ export default function OrderPage() {
             <ArrowLeft size={24} className="text-foreground mr-4" />
             <h1 className="font-serif font-bold text-xl text-gradient-dark">Menu</h1>
           </Link>
-          <Logo className="h-8 w-auto" />
+          <span className="font-serif font-bold text-[#E8810A] text-xl">Hotel Bheemasena</span>
         </div>
 
         {/* Category Tabs */}
@@ -419,7 +419,7 @@ export default function OrderPage() {
               <div className="w-[40px] h-[4px] bg-[rgba(26,10,0,0.15)] rounded-full mx-auto mb-5"></div>
               
               <div className="flex justify-center mb-4">
-                <Logo className="h-[48px] w-auto" />
+                <span className="font-serif font-bold text-[#E8810A] text-3xl">Hotel Bheemasena</span>
               </div>
               
               <h2 className="text-[20px] font-bold text-[#1A0A00] text-center mb-2">
