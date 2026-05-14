@@ -8,12 +8,8 @@ export default function ScrollSequence() {
   const [loaderOpacity, setLoaderOpacity] = useState(1);
   const [isLoaderVisible, setIsLoaderVisible] = useState(true);
   const [loadedFramesCount, setLoadedFramesCount] = useState(0);
-  const [stageHeight, setStageHeight] = useState("100vh");
-  const [trackHeight, setTrackHeight] = useState("500vh");
 
   useEffect(() => {
-    setStageHeight(`${window.innerHeight}px`);
-    setTrackHeight(`${window.innerHeight * 5}px`);
 
     const frames: HTMLImageElement[] = [];
     let targetFrame = 0;
@@ -39,10 +35,21 @@ export default function ScrollSequence() {
     if (!ctx) return;
 
     /* ── Canvas sizing (HiDPI / 4K aware) ── */
+    let lastWindowWidth = window.innerWidth;
+
     function resizeCanvas() {
+      if (window.innerWidth === lastWindowWidth && window.innerWidth < 768 && canvas.width > 0) {
+        cacheLayout();
+        return; 
+      }
+      lastWindowWidth = window.innerWidth;
+
       const dpr = window.devicePixelRatio || 1;
+      const stage = document.getElementById("sticky-stage");
+      const stageH = stage ? stage.clientHeight : window.innerHeight;
+
       canvas.width = Math.round(window.innerWidth * dpr);
-      canvas.height = Math.round(window.innerHeight * dpr);
+      canvas.height = Math.round(stageH * dpr);
       ctx!.setTransform(1, 0, 0, 1, 0, 0);
       ctx!.scale(dpr, dpr);
       ctx!.imageSmoothingEnabled = true;
@@ -62,7 +69,8 @@ export default function ScrollSequence() {
       if (!img || !img.complete) return;
 
       const cW = window.innerWidth;
-      const cH = window.innerHeight;
+      const stage = document.getElementById("sticky-stage");
+      const cH = stage ? stage.clientHeight : window.innerHeight;
       const iAR = img.naturalWidth / img.naturalHeight;
       const cAR = cW / cH;
 
@@ -492,7 +500,7 @@ export default function ScrollSequence() {
         id="scroll-track"
         style={{
           position: "relative",
-          height: trackHeight,
+          height: "500svh",
           width: "100%",
           background: "#050505", 
         }}
@@ -504,7 +512,7 @@ export default function ScrollSequence() {
             top: 0,
             left: 0,
             width: "100vw",
-            height: stageHeight,
+            height: "100svh",
             overflow: "hidden",
             background: "#050505",
             willChange: "transform",
