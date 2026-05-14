@@ -79,35 +79,20 @@ export default function ScrollSequence() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (ctx as any).imageSmoothingQuality = 'high';
 
-      if (window.innerWidth < 768) {
-        /* MOBILE — top-anchored: character's face always fully visible */
-        let drawW, drawH, offsetX;
-        if (iAR > cAR) {
-          drawH = cH;
-          drawW = drawH * iAR;
-          offsetX = (cW - drawW) / 2;
-          ctx!.drawImage(img, offsetX, 0, drawW, drawH);
-        } else {
-          drawW = cW;
-          drawH = drawW / iAR;
-          ctx!.drawImage(img, 0, 0, drawW, drawH);
-        }
+      /* Universal contain: full frame, centered with letterboxing */
+      let drawW, drawH, offsetX, offsetY;
+      if (iAR > cAR) {
+        drawW = cW;
+        drawH = cW / iAR;
+        offsetX = 0;
+        offsetY = (cH - drawH) / 2;
       } else {
-        /* DESKTOP — contain: full frame, centered with letterboxing */
-        let drawW, drawH, offsetX, offsetY;
-        if (iAR > cAR) {
-          drawW = cW;
-          drawH = cW / iAR;
-          offsetX = 0;
-          offsetY = (cH - drawH) / 2;
-        } else {
-          drawH = cH;
-          drawW = cH * iAR;
-          offsetX = (cW - drawW) / 2;
-          offsetY = 0;
-        }
-        ctx!.drawImage(img, offsetX, offsetY, drawW, drawH);
+        drawH = cH;
+        drawW = cH * iAR;
+        offsetX = (cW - drawW) / 2;
+        offsetY = 0;
       }
+      ctx!.drawImage(img, offsetX, offsetY, drawW, drawH);
     }
 
     /* ── Beat visibility logic ── */
@@ -500,7 +485,7 @@ export default function ScrollSequence() {
         id="scroll-track"
         style={{
           position: "relative",
-          height: "500svh",
+          height: "500vh",
           width: "100%",
           background: "#050505", 
         }}
@@ -512,7 +497,7 @@ export default function ScrollSequence() {
             top: 0,
             left: 0,
             width: "100vw",
-            height: "100svh",
+            height: "100vh",
             overflow: "hidden",
             background: "#050505",
             willChange: "transform",
@@ -666,6 +651,9 @@ export default function ScrollSequence() {
               </div>
               <p className="beat-micro" style={{ marginTop: "32px", opacity: 0.6 }}>
                 Open daily · Breakfast, Lunch &amp; Dinner · Dine-in &amp; Takeaway
+              </p>
+              <p className="beat-micro" style={{ marginTop: "16px", opacity: 0.4 }}>
+                © {new Date().getFullYear()} Hotel Bheemasena. Built with ❤️ for VIT-AP students.
               </p>
             </div>
 
