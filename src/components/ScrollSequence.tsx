@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
 
 export default function ScrollSequence() {
   const TOTAL_FRAMES = 240;
+  const [loaderOpacity, setLoaderOpacity] = useState(1);
+  const [isLoaderVisible, setIsLoaderVisible] = useState(true);
 
   useEffect(() => {
     const frames: HTMLImageElement[] = [];
@@ -14,7 +16,7 @@ export default function ScrollSequence() {
     // --- Canvas setup ---
     const canvas = document.getElementById("bheemasena-canvas") as HTMLCanvasElement;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: false, alpha: false });
     if (!ctx) return;
 
     /* ── Canvas sizing (HiDPI / 4K aware) ── */
@@ -132,25 +134,31 @@ export default function ScrollSequence() {
     
     window.addEventListener("scroll", onScroll, { passive: true });
 
-    /* ── Preload all 240 frames ── */
-    const firstImg = new Image();
-    const firstNum = String(1).padStart(3, "0");
-    firstImg.src = `/bheemasena-frames/ezgif-frame-${firstNum}.jpg`;
-    firstImg.onload = () => {
-      resizeCanvas();
-      drawFrame(0);
-    };
-    frames[0] = firstImg;
-
-    for (let i = 2; i <= TOTAL_FRAMES; i++) {
+    /* ── Preload Lazy Queue ── */
+    function loadFrame(i: number) {
       const img = new Image();
-      const num = String(i).padStart(3, "0");
+      const num = String(i).padStart(3, '0');
       img.src = `/bheemasena-frames/ezgif-frame-${num}.jpg`;
+      img.onload = () => {
+        img.decode().catch(() => {}); // decode async, ignore errors
+        if (i === 1) {
+          resizeCanvas();
+          drawFrame(0);
+          setLoaderOpacity(0);
+          setTimeout(() => setIsLoaderVisible(false), 500);
+          // Wave 2
+          setTimeout(() => {
+            for (let j = 11; j <= TOTAL_FRAMES; j++) loadFrame(j);
+          }, 100);
+        }
+      };
       frames[i - 1] = img;
     }
+
+    // Wave 1
+    for (let i = 1; i <= 10; i++) loadFrame(i);
     
     // Initial calls
-    resizeCanvas();
     onScroll();
 
     return () => {
@@ -162,7 +170,39 @@ export default function ScrollSequence() {
 
   return (
     <>
+      {isLoaderVisible && (
+        <div id="loader" style={{
+          position: "fixed", inset: 0, zIndex: 9999,
+          background: "#FDF6E3",
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+          gap: "16px",
+          opacity: loaderOpacity,
+          transition: "opacity 0.5s ease"
+        }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/bheemasena-logo.jpeg" height="64" style={{ height: "64px", width: "auto" }} alt="Hotel Bheemasena" />
+          <p style={{ fontFamily: "'Poppins', sans-serif", color: "#E8810A", fontWeight: 600, fontSize: "15px" }}>
+            Preparing your feast...
+          </p>
+          <div style={{ width: "160px", height: "3px", background: "rgba(232,129,10,0.20)", borderRadius: "999px", overflow: "hidden" }}>
+            <div id="loader-bar" style={{ 
+              height: "100%", 
+              width: "100%", 
+              background: "linear-gradient(90deg, #E8810A, #C0392B)", 
+              borderRadius: "999px",
+              animation: "loadPulse 1.5s infinite ease-in-out" 
+            }}></div>
+          </div>
+        </div>
+      )}
+
       <style dangerouslySetInnerHTML={{__html: `
+        @keyframes loadPulse {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+
         .beat {
           position: absolute;
           background: rgba(253, 246, 227, 0.72);
@@ -178,6 +218,7 @@ export default function ScrollSequence() {
           pointer-events: none;
           transition: opacity 0.45s ease, transform 0.45s ease;
           box-sizing: border-box;
+          z-index: 10;
         }
         
         @media (max-width: 767px) {
@@ -312,8 +353,54 @@ export default function ScrollSequence() {
         #bheemasena-canvas {
           image-rendering: -webkit-optimize-contrast;
           image-rendering: crisp-edges;
+          opacity: 0.55;
+          transition: opacity 0.3s ease;
         }
+
+        #canvas-vignette {
+          position: absolute;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
+          z-index: 2;
+          pointer-events: none;
+          background: radial-gradient(
+            ellipse at center,
+            transparent 40%,
+            rgba(253, 246, 227, 0.35) 75%,
+            rgba(253, 246, 227, 0.65) 100%
+          );
+        }
+
+        .myth-symbol {
+          position: absolute;
+          pointer-events: none;
+          user-select: none;
+          z-index: 3;
+          opacity: 0.08;
+          fill: none;
+          stroke: #E8810A;
+          stroke-width: 2;
+        }
+
+        .myth-symbol-filled {
+          position: absolute;
+          pointer-events: none;
+          user-select: none;
+          z-index: 3;
+          opacity: 0.08;
+          fill: #E8810A;
+        }
+
+        .myth-lotus { opacity: 0.10; stroke: #C0392B; stroke-width: 2; }
       `}} />
+
+      {/* Decorative top border above the scrollytelling */}
+      <div style={{ width: "100%", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "#FDF6E3", position: "relative", zIndex: 10 }}>
+        {/* Diya separator */}
+        <svg viewBox="0 0 100 100" style={{ height: "32px", opacity: 0.30, fill: "#E8810A" }} className="myth-symbol-filled relative">
+          <path d="M50 0 C80 40 80 80 50 100 C20 80 20 40 50 0 M30 100 L70 100 L70 110 L30 110 Z" />
+        </svg>
+      </div>
 
       <section
         id="scroll-track"
@@ -336,6 +423,27 @@ export default function ScrollSequence() {
             background: "#141414",
           }}
         >
+          {/* Lotus top left */}
+          <svg viewBox="0 0 100 100" className="myth-symbol myth-lotus" style={{ top: "20px", left: "20px", width: "60px", height: "60px" }}>
+            <path d="M50 95 C20 95 5 70 5 50 C25 35 40 45 50 60 C60 45 75 35 95 50 C95 70 80 95 50 95 M50 95 C30 75 25 35 50 5 C75 35 70 75 50 95" />
+          </svg>
+
+          {/* Lotus top right */}
+          <svg viewBox="0 0 100 100" className="myth-symbol myth-lotus" style={{ top: "20px", right: "20px", width: "60px", height: "60px" }}>
+            <path d="M50 95 C20 95 5 70 5 50 C25 35 40 45 50 60 C60 45 75 35 95 50 C95 70 80 95 50 95 M50 95 C30 75 25 35 50 5 C75 35 70 75 50 95" />
+          </svg>
+
+          {/* Gada left center */}
+          <svg viewBox="0 0 100 300" className="myth-symbol-filled" style={{ left: "10px", top: "50%", transform: "translateY(-50%)", height: "clamp(80px, 15vw, 180px)", width: "auto" }}>
+            <path d="M40 280 L60 280 L60 220 C80 200 90 150 90 100 C90 50 60 20 50 0 C40 20 10 50 10 100 C10 150 20 200 40 220 Z" />
+          </svg>
+
+          {/* Conch bottom right */}
+          <svg viewBox="0 0 100 100" className="myth-symbol-filled" style={{ bottom: "20px", right: "20px", width: "80px", height: "80px" }}>
+            <path d="M30 90 C10 70 10 30 50 10 C90 30 90 70 70 90 C60 110 40 110 30 90 M50 10 C60 30 60 60 40 70" fill="none" stroke="#E8810A" strokeWidth="4" />
+            <path d="M30 90 C10 70 10 30 50 10 C90 30 90 70 70 90 C60 110 40 110 30 90 Z" opacity="0.5" />
+          </svg>
+
           <canvas
             id="bheemasena-canvas"
             style={{
@@ -347,6 +455,8 @@ export default function ScrollSequence() {
               zIndex: 1,
             }}
           ></canvas>
+
+          <div id="canvas-vignette"></div>
 
           <div
             id="text-overlays"
@@ -375,11 +485,14 @@ export default function ScrollSequence() {
                 }} 
               />
               <p className="beat-headline">Hotel Bheemasena</p>
-              <p className="beat-sub" style={{ color: "#E8810A", fontWeight: 600, fontSize: "clamp(15px, 3.5vw, 20px)" }}>
+              <p className="beat-sub" style={{ color: "#B85E00", fontWeight: 700, fontSize: "clamp(16px, 3.5vw, 22px)" }}>
                 Where every meal feels like a celebration.
               </p>
+              <p className="beat-sub">
+                Nestled in Mandadam, steps away from VIT-AP University — Bheemasena has been the heart of student hunger since day one. Every plate tells a story. Every bite feels like home.
+              </p>
               <p className="beat-micro">
-                Serving the hungry hearts of VIT-AP University — right here in Mandadam.
+                Mandadam – 522237 &nbsp;·&nbsp; Open daily &nbsp;·&nbsp; Breakfast to Dinner
               </p>
             </div>
 
@@ -387,27 +500,38 @@ export default function ScrollSequence() {
             <div id="beat-2" className="beat">
               <p className="beat-headline saffron">Made with love.<br/>Served with soul.</p>
               <p className="beat-sub">
-                Every dish at Bheemasena is crafted fresh, packed with flavour, and priced for students who deserve the best.
+                Every morning our kitchen fires up before sunrise. Fresh ingredients, handpicked daily. No shortcuts, no compromise — just the kind of food your grandmother would approve of.
               </p>
               <p className="beat-sub">
-                From morning tiffins to hearty rice meals — your day starts and ends better here.
+                From piping hot idlis at 7am to satisfying rice meals at noon — Bheemasena fuels your whole day, every day.
+              </p>
+              <p className="beat-micro">
+                Freshly cooked &nbsp;·&nbsp; No preservatives &nbsp;·&nbsp; Made to order
               </p>
             </div>
 
             {/* Beat 3 — THE FEAST */}
             <div id="beat-3" className="beat">
-              <p className="beat-headline">A menu built for<br/>every craving.</p>
+              <p className="beat-headline">A menu built<br/>for every craving.</p>
               <div className="beat-point">
                 <ChevronRight size={16} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
-                <span>Biryani that hits different after a long lab session.</span>
+                <span><strong>Biryani</strong> — slow-cooked, aromatic, the real deal. Not fast food biryani.</span>
               </div>
               <div className="beat-point">
                 <ChevronRight size={16} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
-                <span>Thali plates loaded with rice, curries, dal, pickle, and papad.</span>
+                <span><strong>Thali</strong> — unlimited rice, 3 curries, dal, rasam, pickle, papad, and dessert.</span>
               </div>
               <div className="beat-point">
                 <ChevronRight size={16} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
-                <span>Quick snacks, cold drinks, and chai — we&apos;ve got your whole day.</span>
+                <span><strong>Tiffins</strong> — idli, vada, dosa, upma, pongal. Breakfast done right.</span>
+              </div>
+              <div className="beat-point">
+                <ChevronRight size={16} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
+                <span><strong>Snacks &amp; Chai</strong> — mirchi bajji, bonda, samosa. Perfect between lectures.</span>
+              </div>
+              <div className="beat-point">
+                <ChevronRight size={16} color="#E8810A" className="flex-shrink-0 mt-[2px]" />
+                <span><strong>Specials</strong> — rotating weekly dishes, seasonal curries, festival sweets.</span>
               </div>
             </div>
 
@@ -415,31 +539,40 @@ export default function ScrollSequence() {
             <div id="beat-4" className="beat">
               <p className="beat-headline">Full stomach.<br/>Happy heart.</p>
               <p className="beat-sub">
-                Great food shouldn&apos;t cost your whole month&apos;s pocket money. At Bheemasena, you eat well, spend smart, and leave happy — every single time.
+                A student&apos;s budget is precious. At Bheemasena, a full, satisfying meal costs less than your coffee. We believe good food is a right, not a luxury.
               </p>
-              <p className="beat-sub" style={{ color: "#E8810A", fontWeight: 600 }}>
-                Student-friendly prices. Generous portions. Always fresh. Always hot.
+              <p className="beat-sub">
+                Generous portions. Honest prices. The same warmth whether you are a fresher on your first day or a final-year regular who has eaten here a thousand times.
+              </p>
+              <p className="beat-micro" style={{ color: "#B85E00", fontWeight: 600 }}>
+                Thali from ₹60 &nbsp;·&nbsp; Biryani from ₹80 &nbsp;·&nbsp; Tiffin from ₹30
               </p>
             </div>
 
             {/* Beat 5 — CTA */}
             <div id="beat-5" className="beat">
               <p className="beat-headline">Your next favourite<br/>meal is waiting.</p>
-              <p className="beat-micro" style={{ fontSize: "clamp(12px, 3vw, 14px)", color: "rgba(26,10,0,0.55)", marginBottom: "4px" }}>
-                Hotel Bheemasena, Mandadam — 522237. Right beside VIT-AP University.
+              <p className="beat-sub">
+                Come hungry. Leave happy. Bheemasena is not just a restaurant — it is a VIT-AP institution. Join thousands of students who call this place their second canteen, their comfort, their home away from home.
+              </p>
+              <p className="beat-micro">
+                Hotel Bheemasena &nbsp;·&nbsp; Mandadam – 522237 &nbsp;·&nbsp; Beside VIT-AP University
               </p>
               <div className="beat-btn-row">
-                <a href="/order" className="btn-primary">See Our Menu</a>
+                <a href="/order" className="btn-primary">Order Now</a>
                 <a href="https://maps.google.com/?q=Bheemasena+family+restaurant+amaravati" target="_blank" rel="noopener noreferrer" className="btn-secondary">Get Directions</a>
               </div>
-              <p className="beat-micro" style={{ marginTop: "14px" }}>
-                Open daily. Serving students, faculty, and food lovers since day one.
+              <p className="beat-micro" style={{ marginTop: "12px" }}>
+                Open daily · Breakfast, Lunch &amp; Dinner · Dine-in &amp; Takeaway
               </p>
             </div>
 
           </div>
         </div>
       </section>
+
+      {/* Decorative bottom border */}
+      <div style={{ width: "100%", height: "24px", background: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"24\" viewBox=\"0 0 40 24\"><path d=\"M20 0 L40 12 L20 24 L0 12 Z\" fill=\"none\" stroke=\"rgba(232, 129, 10, 0.25)\" stroke-width=\"1\"/></svg>') repeat-x center", zIndex: 10, position: "relative" }}></div>
     </>
   );
 }
