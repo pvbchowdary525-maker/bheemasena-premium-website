@@ -80,8 +80,9 @@ export default function ScrollSequence() {
       (ctx as any).imageSmoothingQuality = 'high';
 
       let drawW, drawH, offsetX, offsetY;
-      if (window.innerWidth < 768) {
-        // Mobile: True cover to occupy the entire page (like earlier) without partitions
+      if (cH > cW) {
+        // Portrait screens (Mobile/Tablets): True cover to occupy the entire page
+        // This cuts off the side items and focuses on the main character in the center.
         const scale = Math.max(cW / img.naturalWidth, cH / img.naturalHeight);
         drawW = img.naturalWidth * scale;
         drawH = img.naturalHeight * scale;
