@@ -81,11 +81,12 @@ export default function ScrollSequence() {
 
       let drawW, drawH, offsetX, offsetY;
       if (window.innerWidth < 768) {
-        // Mobile: balanced zoom that fits character body horizontally
-        drawW = cW * 1.8; 
-        drawH = drawW / iAR;
+        // Mobile: True cover to occupy the entire page (like earlier) without partitions
+        const scale = Math.max(cW / img.naturalWidth, cH / img.naturalHeight);
+        drawW = img.naturalWidth * scale;
+        drawH = img.naturalHeight * scale;
         offsetX = (cW - drawW) / 2; // Center horizontally
-        offsetY = cH * 0.1; // Anchor slightly from top
+        offsetY = (cH - drawH) / 2; // Center vertically
       } else {
         /* Desktop: contain */
         if (iAR > cAR) {
