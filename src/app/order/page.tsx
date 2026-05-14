@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { Search, Square, ShoppingCart, Trash2, X } from "lucide-react";
+import { Search, Square, ShoppingCart, Trash2, X, ArrowLeft } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 type MenuItem = {
@@ -340,13 +340,4 @@ export default function OrderPage() {
       </AnimatePresence>
     </div>
   );
-}
-// ArrowLeft is needed for back button
-function ArrowLeft(props: any) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m12 19-7-7 7-7"/>
-      <path d="M19 12H5"/>
-    </svg>
-  )
 }

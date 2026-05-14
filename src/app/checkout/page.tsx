@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Banknote, CreditCard, CheckCircle, PartyPopper } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function CheckoutPage() {
   const [isClient, setIsClient] = useState(false);
@@ -84,8 +84,6 @@ export default function CheckoutPage() {
     );
   }
 
-  // Dummy total
-  const dummyTotal = 340;
 
   return (
     <div className="min-h-screen bg-[#FFFAF0] font-sans pb-[40px]">
