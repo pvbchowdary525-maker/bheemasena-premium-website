@@ -35,7 +35,7 @@ export default function ScrollSequence() {
     // --- Canvas setup ---
     const canvas = document.getElementById("bheemasena-canvas") as HTMLCanvasElement;
     if (!canvas) return;
-    // @ts-ignore - desynchronized is a valid property but not in all TS definitions
+    // @ts-expect-error - desynchronized is a valid property but not in all TS definitions
     const ctx = canvas.getContext("2d", { willReadFrequently: false, alpha: false, desynchronized: true });
     if (!ctx) return;
 
