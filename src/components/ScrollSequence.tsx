@@ -13,7 +13,6 @@ export default function ScrollSequence() {
 
     const isMobile = window.innerWidth < 768;
     const FRAME_STEP = isMobile ? 4 : 1; // mobile: every 4th frame
-    const EFFECTIVE_TOTAL = Math.ceil(TOTAL_FRAMES / FRAME_STEP);
 
     const frames: HTMLImageElement[] = [];
     let targetFrame = 0;
