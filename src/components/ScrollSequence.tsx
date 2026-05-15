@@ -81,13 +81,14 @@ export default function ScrollSequence() {
 
       let drawW, drawH, offsetX, offsetY;
       if (cH > cW) {
-        // Portrait screens (Mobile/Tablets): True cover to occupy the entire page
-        // This cuts off the side items and focuses on the main character in the center.
-        const scale = Math.max(cW / img.naturalWidth, cH / img.naturalHeight);
+        // Portrait screens (Mobile/Tablets): CONTAIN so full landscape frame
+        // fits inside viewport. Bheemasena fully visible. Letterbox top/bottom
+        // matches #050505 bg, invisible.
+        const scale = Math.min(cW / img.naturalWidth, cH / img.naturalHeight);
         drawW = img.naturalWidth * scale;
         drawH = img.naturalHeight * scale;
-        offsetX = (cW - drawW) / 2; // Center horizontally
-        offsetY = (cH - drawH) / 2; // Center vertically
+        offsetX = (cW - drawW) / 2;
+        offsetY = (cH - drawH) / 2;
       } else {
         /* Desktop: contain */
         if (iAR > cAR) {
@@ -419,11 +420,17 @@ export default function ScrollSequence() {
         #bheemasena-canvas {
           image-rendering: -webkit-optimize-contrast;
           image-rendering: crisp-edges;
-          opacity: 0.25;
+          opacity: 0.55;
           transition: opacity 0.5s ease;
           will-change: transform;
           transform: translateZ(0);
           backface-visibility: hidden;
+        }
+
+        @media (max-width: 767px) {
+          #bheemasena-canvas {
+            opacity: 0.75;
+          }
         }
 
         #canvas-vignette {
@@ -438,6 +445,17 @@ export default function ScrollSequence() {
             rgba(0, 0, 0, 0.7) 60%,
             rgba(0, 0, 0, 0.95) 100%
           );
+        }
+
+        @media (max-width: 767px) {
+          #canvas-vignette {
+            background: radial-gradient(
+              ellipse at center,
+              transparent 30%,
+              rgba(0, 0, 0, 0.5) 70%,
+              rgba(0, 0, 0, 0.85) 100%
+            );
+          }
         }
 
         .myth-symbol {
