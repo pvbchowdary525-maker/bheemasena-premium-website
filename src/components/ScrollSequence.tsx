@@ -269,7 +269,7 @@ export default function ScrollSequence() {
           <div style={{ width: "160px", height: "3px", background: "rgba(232,129,10,0.20)", borderRadius: "999px", overflow: "hidden" }}>
             <div id="loader-bar" style={{ 
               height: "100%", 
-              width: `${Math.max(5, (loadedFramesCount / (window.innerWidth < 768 ? Math.ceil(TOTAL_FRAMES / 4) : TOTAL_FRAMES)) * 100)}%`,
+              width: `${Math.max(5, (loadedFramesCount / (typeof window !== 'undefined' && window.innerWidth < 768 ? Math.ceil(TOTAL_FRAMES / 4) : TOTAL_FRAMES)) * 100)}%`,
               background: "linear-gradient(90deg, #E8810A, #C0392B)", 
               borderRadius: "999px",
               transition: "width 0.2s ease-out" 
