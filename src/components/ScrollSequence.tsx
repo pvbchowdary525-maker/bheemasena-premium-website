@@ -11,6 +11,10 @@ export default function ScrollSequence() {
 
   useEffect(() => {
 
+    const isMobile = window.innerWidth < 768;
+    const FRAME_STEP = isMobile ? 4 : 1; // mobile: every 4th frame
+    const EFFECTIVE_TOTAL = Math.ceil(TOTAL_FRAMES / FRAME_STEP);
+
     const frames: HTMLImageElement[] = [];
     let targetFrame = 0;
     let interpolatedFrame = 0;
@@ -137,8 +141,10 @@ export default function ScrollSequence() {
       const scrolled = Math.max(0, window.scrollY - cachedTrackTop);
       const progress = Math.min(scrolled / cachedTotalScroll, 1); // 0.0 → 1.0
 
+      const rawFrame = Math.floor(progress * TOTAL_FRAMES);
+      // Snap to nearest loaded frame on mobile
       targetFrame = Math.min(
-        Math.floor(progress * TOTAL_FRAMES),
+        Math.floor(rawFrame / FRAME_STEP) * FRAME_STEP,
         TOTAL_FRAMES - 1
       );
 
@@ -163,7 +169,7 @@ export default function ScrollSequence() {
     }
     loopRafId = requestAnimationFrame(renderLoop);
 
-    /* ── Preload Lazy Queue (4 Waves) ── */
+    /* ── Preload (mobile: every Nth frame, desktop: all) ── */
     function loadFrame(i: number) {
       const img = new Image();
       img.loading = "eager";
@@ -171,26 +177,59 @@ export default function ScrollSequence() {
       img.src = `/bheemasena-frames/ezgif-frame-${num}.jpg`;
       img.onload = () => {
         setLoadedFramesCount(prev => prev + 1);
-        img.decode().catch(() => {}); // decode async, ignore errors
+        img.decode().catch(() => {});
         if (i === 1) {
           resizeCanvas();
           lastDrawnFrame = 0;
           drawFrame(0);
           setLoaderOpacity(0);
           setTimeout(() => setIsLoaderVisible(false), 500);
-          
-          // Wave 2: frames 2-20 right after frame 1
-          for (let j = 2; j <= 20; j++) loadFrame(j);
-          
-          // Wave 3: frames 21-100 after 300ms
-          setTimeout(() => {
-            for (let j = 21; j <= 100; j++) loadFrame(j);
-          }, 300);
-          
-          // Wave 4: frames 101-240 after 800ms
-          setTimeout(() => {
-            for (let j = 101; j <= TOTAL_FRAMES; j++) loadFrame(j);
-          }, 800);
+
+          // Build remaining frame list based on step
+          const remaining: number[] = [];
+          for (let j = 1 + FRAME_STEP; j <= TOTAL_FRAMES; j += FRAME_STEP) {
+            remaining.push(j);
+          }
+
+          if (isMobile) {
+            // Mobile: sequential load, no waves, prevent stall
+            let idx = 0;
+            const loadNext = () => {
+              if (idx >= remaining.length) return;
+              const frameNum = remaining[idx++];
+              const nextImg = new Image();
+              nextImg.loading = "eager";
+              const n = String(frameNum).padStart(3, '0');
+              nextImg.src = `/bheemasena-frames/ezgif-frame-${n}.jpg`;
+              nextImg.onload = () => {
+                setLoadedFramesCount(prev => prev + 1);
+                nextImg.decode().catch(() => {});
+                loadNext();
+              };
+              nextImg.onerror = () => loadNext();
+              // Fill all slots up to next-loaded with same img for snap-mapping
+              for (let k = frameNum - FRAME_STEP + 1; k <= frameNum && k < TOTAL_FRAMES; k++) {
+                frames[k - 1] = nextImg;
+              }
+            };
+            loadNext();
+          } else {
+            // Desktop: original 3-wave parallel preload
+            for (let j = 2; j <= 20; j++) loadFrame(j);
+            setTimeout(() => {
+              for (let j = 21; j <= 100; j++) loadFrame(j);
+            }, 300);
+            setTimeout(() => {
+              for (let j = 101; j <= TOTAL_FRAMES; j++) loadFrame(j);
+            }, 800);
+          }
+        }
+      };
+      img.onerror = () => {
+        // If frame 1 fails, force hide loader so user not stuck
+        if (i === 1) {
+          setLoaderOpacity(0);
+          setTimeout(() => setIsLoaderVisible(false), 500);
         }
       };
       frames[i - 1] = img;
@@ -231,7 +270,7 @@ export default function ScrollSequence() {
           <div style={{ width: "160px", height: "3px", background: "rgba(232,129,10,0.20)", borderRadius: "999px", overflow: "hidden" }}>
             <div id="loader-bar" style={{ 
               height: "100%", 
-              width: `${Math.max(5, (loadedFramesCount / TOTAL_FRAMES) * 100)}%`, 
+              width: `${Math.max(5, (loadedFramesCount / (window.innerWidth < 768 ? Math.ceil(TOTAL_FRAMES / 4) : TOTAL_FRAMES)) * 100)}%`,
               background: "linear-gradient(90deg, #E8810A, #C0392B)", 
               borderRadius: "999px",
               transition: "width 0.2s ease-out" 
