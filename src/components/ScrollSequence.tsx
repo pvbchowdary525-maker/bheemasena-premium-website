@@ -81,14 +81,16 @@ export default function ScrollSequence() {
 
       let drawW, drawH, offsetX, offsetY;
       if (cH > cW) {
-        // Portrait screens (Mobile/Tablets): CONTAIN so full landscape frame
-        // fits inside viewport. Bheemasena fully visible. Letterbox top/bottom
-        // matches #050505 bg, invisible.
-        const scale = Math.min(cW / img.naturalWidth, cH / img.naturalHeight);
+        // Mobile/Tablet portrait: cover-scale targeting the figure-center.
+        // Frame is landscape with subject in vertical middle ~60% of image.
+        // Scale by width so full horizontal composition fits, then shift up
+        // so the figure (not the empty white floor space) lands in viewport center.
+        const scale = cW / img.naturalWidth * 1.4; // 1.4x zoom past width-fit
         drawW = img.naturalWidth * scale;
         drawH = img.naturalHeight * scale;
         offsetX = (cW - drawW) / 2;
-        offsetY = (cH - drawH) / 2;
+        // Anchor at 35% from top instead of 50% — Bheemasena sits lower in frame
+        offsetY = (cH - drawH) * 0.35;
       } else {
         /* Desktop: contain */
         if (iAR > cAR) {
@@ -420,16 +422,18 @@ export default function ScrollSequence() {
         #bheemasena-canvas {
           image-rendering: -webkit-optimize-contrast;
           image-rendering: crisp-edges;
-          opacity: 0.55;
+          opacity: 0.85;
           transition: opacity 0.5s ease;
           will-change: transform;
           transform: translateZ(0);
           backface-visibility: hidden;
+          mix-blend-mode: screen;
         }
 
         @media (max-width: 767px) {
           #bheemasena-canvas {
-            opacity: 0.75;
+            opacity: 1;
+            mix-blend-mode: normal;
           }
         }
 
@@ -441,19 +445,20 @@ export default function ScrollSequence() {
           pointer-events: none;
           background: radial-gradient(
             ellipse at center,
-            transparent 10%,
-            rgba(0, 0, 0, 0.7) 60%,
-            rgba(0, 0, 0, 0.95) 100%
+            transparent 25%,
+            rgba(5, 5, 5, 0.6) 70%,
+            rgba(5, 5, 5, 1) 100%
           );
         }
 
         @media (max-width: 767px) {
           #canvas-vignette {
-            background: radial-gradient(
-              ellipse at center,
-              transparent 30%,
-              rgba(0, 0, 0, 0.5) 70%,
-              rgba(0, 0, 0, 0.85) 100%
+            background: linear-gradient(
+              to bottom,
+              rgba(5, 5, 5, 1) 0%,
+              rgba(5, 5, 5, 0.4) 25%,
+              rgba(5, 5, 5, 0.4) 75%,
+              rgba(5, 5, 5, 1) 100%
             );
           }
         }
